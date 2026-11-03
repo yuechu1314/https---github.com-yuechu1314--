@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -42,14 +42,8 @@
         .sidebar-header h2 {
             font-size: 20px;
             font-weight: bold;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             color: #fff;
-        }
-
-        .sidebar-header .subtitle {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 4px;
         }
 
         .sidebar-nav {
@@ -57,20 +51,24 @@
             padding: 8px 0;
         }
 
-        /* 学院分组 */
+        /* 学院统一折叠面板 */
         .college-group {
-            margin-bottom: 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .college-group:last-child {
+            border-bottom: none;
         }
 
         .college-title {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
+            padding: 14px 20px;
             cursor: pointer;
             font-size: 15px;
             font-weight: bold;
             color: #e0e8f0;
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(255, 255, 255, 0.03);
             border-left: 3px solid transparent;
             transition: all 0.25s ease;
             user-select: none;
@@ -85,7 +83,7 @@
         .college-title .icon {
             width: 24px;
             height: 24px;
-            margin-right: 10px;
+            margin-right: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -96,16 +94,18 @@
             margin-left: auto;
             font-size: 12px;
             transition: transform 0.3s ease;
+            opacity: 0.6;
         }
 
         .college-group.open .college-title .arrow {
             transform: rotate(90deg);
+            opacity: 1;
         }
 
         .college-group.open .college-title {
             border-left-color: #4fc3f7;
-            background: rgba(255, 255, 255, 0.08);
-            color: #fff;
+            background: rgba(79, 195, 247, 0.1);
+            color: #4fc3f7;
         }
 
         /* 专业子列表 */
@@ -114,7 +114,7 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.4s ease;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.15);
         }
 
         .college-group.open .major-list {
@@ -122,7 +122,7 @@
         }
 
         .major-list li {
-            padding: 9px 20px 9px 54px;
+            padding: 10px 20px 10px 56px;
             cursor: pointer;
             font-size: 13px;
             color: #b0c4d8;
@@ -140,7 +140,7 @@
             width: 5px;
             height: 5px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25);
             transition: all 0.2s ease;
         }
 
@@ -403,8 +403,7 @@
     <!-- ==================== 侧边工具栏 ==================== -->
     <aside class="sidebar">
         <div class="sidebar-header">
-            <h2>🏥 福建卫职院</h2>
-            <div class="subtitle">百事通 · 专业导航</div>
+            <h2>📋 学院分布</h2>
         </div>
 
         <nav class="sidebar-nav" id="sidebarNav">
@@ -603,79 +602,51 @@
         // 切换学院展开/折叠
         function toggleCollege(titleEl) {
             const group = titleEl.parentElement;
-            // 关闭其他已打开的学院组
             const allGroups = document.querySelectorAll('.college-group.open');
             allGroups.forEach(g => {
                 if (g !== group) {
                     g.classList.remove('open');
                 }
             });
-            // 切换当前组
             group.classList.toggle('open');
         }
 
         // 选中专业
         function selectMajor(liEl, event) {
             event.stopPropagation();
-
-            // 移除所有active状态
-            document.querySelectorAll('.major-list li.active').forEach(li => {
-                li.classList.remove('active');
-            });
-
-            // 设置当前为active
+            document.querySelectorAll('.major-list li.active').forEach(li => li.classList.remove('active'));
             liEl.classList.add('active');
 
-            // 获取学院名和专业名
             const collegeGroup = liEl.closest('.college-group');
             const collegeName = collegeGroup.getAttribute('data-college');
             const majorName = liEl.getAttribute('data-major');
 
-            // 确保学院组展开
             collegeGroup.classList.add('open');
-
-            // 更新面包屑
             document.getElementById('breadcrumbCurrent').textContent = collegeName + ' › ' + majorName;
 
-            // 显示信息面板
             const panel = document.getElementById('infoPanel');
             panel.classList.add('show');
-
             document.getElementById('infoMajorTitle').textContent = majorName;
             document.getElementById('infoCollegeName').textContent = '所属学院：' + collegeName;
             document.getElementById('infoDesc').textContent = getMajorDescription(collegeName, majorName);
 
-            // 隐藏主页横幅
             document.getElementById('heroBanner').style.display = 'none';
-
-            // 滚动到信息面板
             panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         // 点击学院卡片跳转并展开对应侧边栏
         function scrollToCollege(collegeName) {
-            // 关闭所有学院组
             document.querySelectorAll('.college-group').forEach(g => g.classList.remove('open'));
-
-            // 找到对应学院组并展开
             const groups = document.querySelectorAll('.college-group');
             let targetGroup = null;
             groups.forEach(g => {
-                if (g.getAttribute('data-college') === collegeName) {
-                    targetGroup = g;
-                }
+                if (g.getAttribute('data-college') === collegeName) targetGroup = g;
             });
-
             if (targetGroup) {
                 targetGroup.classList.add('open');
-                // 滚动侧边栏使该学院可见
                 targetGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-
-            // 更新面包屑
             document.getElementById('breadcrumbCurrent').textContent = collegeName;
-
-            // 隐藏信息面板，显示横幅
             document.getElementById('infoPanel').classList.remove('show');
             document.getElementById('heroBanner').style.display = 'block';
         }
@@ -724,7 +695,6 @@
                     '婴幼儿托育服务与管理': '婴幼儿托育服务与管理专业培养掌握婴幼儿身心发展规律及托育服务管理的基本理论和技能，能在托育机构、早教中心从事婴幼儿照护、教育及机构管理工作的专业人才。'
                 }
             };
-
             if (descriptions[college] && descriptions[college][major]) {
                 return descriptions[college][major];
             }
@@ -734,9 +704,7 @@
         // 页面加载完成后，默认展开第一个学院
         document.addEventListener('DOMContentLoaded', function () {
             const firstGroup = document.querySelector('.college-group');
-            if (firstGroup) {
-                firstGroup.classList.add('open');
-            }
+            if (firstGroup) firstGroup.classList.add('open');
         });
     </script>
 
