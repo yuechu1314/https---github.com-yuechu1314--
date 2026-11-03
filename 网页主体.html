@@ -51,7 +51,127 @@
             padding: 8px 0;
         }
 
-        /* 学院统一折叠面板 */
+        /* 学院分布入口按钮 */
+        .college-dist-entry {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            margin: 12px 12px;
+            cursor: pointer;
+            background: linear-gradient(135deg, rgba(79, 195, 247, 0.15), rgba(79, 195, 247, 0.05));
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .college-dist-entry:hover {
+            background: linear-gradient(135deg, rgba(79, 195, 247, 0.25), rgba(79, 195, 247, 0.1));
+            border-color: #4fc3f7;
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.2);
+            transform: scale(1.02);
+        }
+
+        .college-dist-entry .icon {
+            font-size: 22px;
+            margin-right: 12px;
+        }
+
+        .college-dist-entry .entry-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #e0e8f0;
+        }
+
+        .college-dist-entry .entry-hint {
+            margin-left: auto;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 模态弹窗遮罩 */
+        .college-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .college-modal-overlay.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 模态弹窗内容 */
+        .college-modal-content {
+            background: #fff;
+            border-radius: 16px;
+            width: 680px;
+            max-width: 92vw;
+            max-height: 82vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        .college-modal-header {
+            display: flex;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e8ecf1;
+        }
+
+        .college-modal-header h3 {
+            font-size: 20px;
+            color: #1a3a5c;
+            font-weight: bold;
+        }
+
+        .modal-close-btn {
+            margin-left: auto;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: #f0f4f8;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .college-modal-body {
+            flex: 1;
+            padding: 20px 24px;
+            overflow-y: auto;
+        }
+
+        /* 模态中的学院分组 */
         .college-group {
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
@@ -407,84 +527,11 @@
         </div>
 
         <nav class="sidebar-nav" id="sidebarNav">
-            <!-- 护理学院 -->
-            <div class="college-group" data-college="护理学院">
-                <div class="college-title" onclick="toggleCollege(this)">
-                    <span class="icon">💉</span>护理学院
-                    <span class="arrow">▶</span>
-                </div>
-                <ul class="major-list">
-                    <li data-major="护理" onclick="selectMajor(this, event)">护理</li>
-                    <li data-major="助产" onclick="selectMajor(this, event)">助产</li>
-                    <li data-major="老年保健与管理" onclick="selectMajor(this, event)">老年保健与管理</li>
-                </ul>
-            </div>
-
-            <!-- 药学院 -->
-            <div class="college-group" data-college="药学院">
-                <div class="college-title" onclick="toggleCollege(this)">
-                    <span class="icon">💊</span>药学院
-                    <span class="arrow">▶</span>
-                </div>
-                <ul class="major-list">
-                    <li data-major="药学" onclick="selectMajor(this, event)">药学</li>
-                    <li data-major="中药学" onclick="selectMajor(this, event)">中药学</li>
-                    <li data-major="药品经营与管理" onclick="selectMajor(this, event)">药品经营与管理</li>
-                    <li data-major="药品生产技术" onclick="selectMajor(this, event)">药品生产技术</li>
-                    <li data-major="药品质量与安全" onclick="selectMajor(this, event)">药品质量与安全</li>
-                </ul>
-            </div>
-
-            <!-- 医学院 -->
-            <div class="college-group" data-college="医学院">
-                <div class="college-title" onclick="toggleCollege(this)">
-                    <span class="icon">🩺</span>医学院
-                    <span class="arrow">▶</span>
-                </div>
-                <ul class="major-list">
-                    <li data-major="临床医学" onclick="selectMajor(this, event)">临床医学</li>
-                    <li data-major="口腔医学" onclick="selectMajor(this, event)">口腔医学</li>
-                    <li data-major="中医学" onclick="selectMajor(this, event)">中医学</li>
-                    <li data-major="针灸推拿" onclick="selectMajor(this, event)">针灸推拿</li>
-                    <li data-major="康复治疗技术" onclick="selectMajor(this, event)">康复治疗技术</li>
-                    <li data-major="中医康复技术" onclick="selectMajor(this, event)">中医康复技术</li>
-                </ul>
-            </div>
-
-            <!-- 医学技术与工程学院 -->
-            <div class="college-group" data-college="医学技术与工程学院">
-                <div class="college-title" onclick="toggleCollege(this)">
-                    <span class="icon">🔬</span>医学技术与工程学院
-                    <span class="arrow">▶</span>
-                </div>
-                <ul class="major-list">
-                    <li data-major="医学检验技术" onclick="selectMajor(this, event)">医学检验技术</li>
-                    <li data-major="医学影像技术" onclick="selectMajor(this, event)">医学影像技术</li>
-                    <li data-major="眼视光技术" onclick="selectMajor(this, event)">眼视光技术</li>
-                    <li data-major="医学美容技术" onclick="selectMajor(this, event)">医学美容技术</li>
-                    <li data-major="医用电子仪器技术" onclick="selectMajor(this, event)">医用电子仪器技术</li>
-                    <li data-major="智能医疗装备技术" onclick="selectMajor(this, event)">智能医疗装备技术</li>
-                    <li data-major="制药设备应用技术" onclick="selectMajor(this, event)">制药设备应用技术</li>
-                    <li data-major="智能产品开发与应用" onclick="selectMajor(this, event)">智能产品开发与应用</li>
-                </ul>
-            </div>
-
-            <!-- 公共卫生与健康管理学院 -->
-            <div class="college-group" data-college="公共卫生与健康管理学院">
-                <div class="college-title" onclick="toggleCollege(this)">
-                    <span class="icon">🌿</span>公共卫生与健康管理学院
-                    <span class="arrow">▶</span>
-                </div>
-                <ul class="major-list">
-                    <li data-major="预防医学" onclick="selectMajor(this, event)">预防医学</li>
-                    <li data-major="卫生信息管理" onclick="selectMajor(this, event)">卫生信息管理</li>
-                    <li data-major="健康管理" onclick="selectMajor(this, event)">健康管理</li>
-                    <li data-major="公共卫生管理" onclick="selectMajor(this, event)">公共卫生管理</li>
-                    <li data-major="医学营养" onclick="selectMajor(this, event)">医学营养</li>
-                    <li data-major="健康大数据管理与服务" onclick="selectMajor(this, event)">健康大数据管理与服务</li>
-                    <li data-major="体育保健与康复" onclick="selectMajor(this, event)">体育保健与康复</li>
-                    <li data-major="婴幼儿托育服务与管理" onclick="selectMajor(this, event)">婴幼儿托育服务与管理</li>
-                </ul>
+            <!-- 学院分布统一入口 -->
+            <div class="college-dist-entry" onclick="openCollegeModal()">
+                <span class="icon">🏛️</span>
+                <span class="entry-text">学院分布</span>
+                <span class="entry-hint">点击查看</span>
             </div>
         </nav>
 
@@ -599,6 +646,19 @@
     </main>
 
     <script>
+        // 打开学院分布弹窗
+        function openCollegeModal() {
+            document.getElementById('collegeModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭学院分布弹窗
+        function closeCollegeModal(event) {
+            if (event && event.target !== document.getElementById('collegeModal')) return;
+            document.getElementById('collegeModal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
         // 切换学院展开/折叠
         function toggleCollege(titleEl) {
             const group = titleEl.parentElement;
@@ -631,21 +691,26 @@
             document.getElementById('infoDesc').textContent = getMajorDescription(collegeName, majorName);
 
             document.getElementById('heroBanner').style.display = 'none';
+
+            // 选中专业后关闭弹窗
+            document.getElementById('collegeModal').classList.remove('show');
+            document.body.style.overflow = '';
+
             panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // 点击学院卡片跳转并展开对应侧边栏
+        // 点击学院卡片打开弹窗并展开对应学院
         function scrollToCollege(collegeName) {
-            document.querySelectorAll('.college-group').forEach(g => g.classList.remove('open'));
-            const groups = document.querySelectorAll('.college-group');
-            let targetGroup = null;
-            groups.forEach(g => {
-                if (g.getAttribute('data-college') === collegeName) targetGroup = g;
+            document.getElementById('collegeModal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+            const modalGroups = document.querySelectorAll('#collegeModalBody .college-group');
+            modalGroups.forEach(g => g.classList.remove('open'));
+            modalGroups.forEach(g => {
+                if (g.getAttribute('data-college') === collegeName) {
+                    g.classList.add('open');
+                    setTimeout(() => g.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                }
             });
-            if (targetGroup) {
-                targetGroup.classList.add('open');
-                targetGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
             document.getElementById('breadcrumbCurrent').textContent = collegeName;
             document.getElementById('infoPanel').classList.remove('show');
             document.getElementById('heroBanner').style.display = 'block';
@@ -700,13 +765,94 @@
             }
             return '该专业致力于培养具有扎实理论基础和熟练实践技能的高素质医药卫生人才，为健康中国建设贡献力量。';
         }
-
-        // 页面加载完成后，默认展开第一个学院
-        document.addEventListener('DOMContentLoaded', function () {
-            const firstGroup = document.querySelector('.college-group');
-            if (firstGroup) firstGroup.classList.add('open');
-        });
     </script>
+
+    <!-- ==================== 学院分布模态弹窗 ==================== -->
+    <div class="college-modal-overlay" id="collegeModal" onclick="closeCollegeModal(event)">
+        <div class="college-modal-content" onclick="event.stopPropagation()">
+            <div class="college-modal-header">
+                <h3>🏛️ 学院分布</h3>
+                <button class="modal-close-btn" onclick="closeCollegeModal()">✕</button>
+            </div>
+            <div class="college-modal-body" id="collegeModalBody">
+                <!-- 护理学院 -->
+                <div class="college-group" data-college="护理学院">
+                    <div class="college-title" onclick="toggleCollege(this)">
+                        <span class="icon">💉</span>护理学院
+                        <span class="arrow">▶</span>
+                    </div>
+                    <ul class="major-list">
+                        <li data-major="护理" onclick="selectMajor(this, event)">护理</li>
+                        <li data-major="助产" onclick="selectMajor(this, event)">助产</li>
+                        <li data-major="老年保健与管理" onclick="selectMajor(this, event)">老年保健与管理</li>
+                    </ul>
+                </div>
+                <!-- 药学院 -->
+                <div class="college-group" data-college="药学院">
+                    <div class="college-title" onclick="toggleCollege(this)">
+                        <span class="icon">💊</span>药学院
+                        <span class="arrow">▶</span>
+                    </div>
+                    <ul class="major-list">
+                        <li data-major="药学" onclick="selectMajor(this, event)">药学</li>
+                        <li data-major="中药学" onclick="selectMajor(this, event)">中药学</li>
+                        <li data-major="药品经营与管理" onclick="selectMajor(this, event)">药品经营与管理</li>
+                        <li data-major="药品生产技术" onclick="selectMajor(this, event)">药品生产技术</li>
+                        <li data-major="药品质量与安全" onclick="selectMajor(this, event)">药品质量与安全</li>
+                    </ul>
+                </div>
+                <!-- 医学院 -->
+                <div class="college-group" data-college="医学院">
+                    <div class="college-title" onclick="toggleCollege(this)">
+                        <span class="icon">🩺</span>医学院
+                        <span class="arrow">▶</span>
+                    </div>
+                    <ul class="major-list">
+                        <li data-major="临床医学" onclick="selectMajor(this, event)">临床医学</li>
+                        <li data-major="口腔医学" onclick="selectMajor(this, event)">口腔医学</li>
+                        <li data-major="中医学" onclick="selectMajor(this, event)">中医学</li>
+                        <li data-major="针灸推拿" onclick="selectMajor(this, event)">针灸推拿</li>
+                        <li data-major="康复治疗技术" onclick="selectMajor(this, event)">康复治疗技术</li>
+                        <li data-major="中医康复技术" onclick="selectMajor(this, event)">中医康复技术</li>
+                    </ul>
+                </div>
+                <!-- 医学技术与工程学院 -->
+                <div class="college-group" data-college="医学技术与工程学院">
+                    <div class="college-title" onclick="toggleCollege(this)">
+                        <span class="icon">🔬</span>医学技术与工程学院
+                        <span class="arrow">▶</span>
+                    </div>
+                    <ul class="major-list">
+                        <li data-major="医学检验技术" onclick="selectMajor(this, event)">医学检验技术</li>
+                        <li data-major="医学影像技术" onclick="selectMajor(this, event)">医学影像技术</li>
+                        <li data-major="眼视光技术" onclick="selectMajor(this, event)">眼视光技术</li>
+                        <li data-major="医学美容技术" onclick="selectMajor(this, event)">医学美容技术</li>
+                        <li data-major="医用电子仪器技术" onclick="selectMajor(this, event)">医用电子仪器技术</li>
+                        <li data-major="智能医疗装备技术" onclick="selectMajor(this, event)">智能医疗装备技术</li>
+                        <li data-major="制药设备应用技术" onclick="selectMajor(this, event)">制药设备应用技术</li>
+                        <li data-major="智能产品开发与应用" onclick="selectMajor(this, event)">智能产品开发与应用</li>
+                    </ul>
+                </div>
+                <!-- 公共卫生与健康管理学院 -->
+                <div class="college-group" data-college="公共卫生与健康管理学院">
+                    <div class="college-title" onclick="toggleCollege(this)">
+                        <span class="icon">🌿</span>公共卫生与健康管理学院
+                        <span class="arrow">▶</span>
+                    </div>
+                    <ul class="major-list">
+                        <li data-major="预防医学" onclick="selectMajor(this, event)">预防医学</li>
+                        <li data-major="卫生信息管理" onclick="selectMajor(this, event)">卫生信息管理</li>
+                        <li data-major="健康管理" onclick="selectMajor(this, event)">健康管理</li>
+                        <li data-major="公共卫生管理" onclick="selectMajor(this, event)">公共卫生管理</li>
+                        <li data-major="医学营养" onclick="selectMajor(this, event)">医学营养</li>
+                        <li data-major="健康大数据管理与服务" onclick="selectMajor(this, event)">健康大数据管理与服务</li>
+                        <li data-major="体育保健与康复" onclick="selectMajor(this, event)">体育保健与康复</li>
+                        <li data-major="婴幼儿托育服务与管理" onclick="selectMajor(this, event)">婴幼儿托育服务与管理</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
