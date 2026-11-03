@@ -89,6 +89,146 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
+        /* 部门导航 */
+        .dept-section-title {
+            padding: 18px 20px 8px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 2px;
+        }
+
+        .dept-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            margin: 3px 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #b0c4d8;
+            border-radius: 8px;
+            border-left: 3px solid transparent;
+            transition: all 0.25s ease;
+            user-select: none;
+        }
+
+        .dept-nav-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-left-color: #ff9800;
+            color: #fff;
+        }
+
+        .dept-nav-item.active {
+            background: rgba(255, 152, 0, 0.15);
+            border-left-color: #ff9800;
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        .dept-nav-item .dept-icon {
+            font-size: 16px;
+            margin-right: 10px;
+            width: 22px;
+            text-align: center;
+        }
+
+        .dept-nav-item.home-item {
+            margin-top: 4px;
+        }
+
+        .dept-nav-item.home-item:hover {
+            border-left-color: #4fc3f7;
+        }
+
+        .dept-nav-item.home-item.active {
+            border-left-color: #4fc3f7;
+            color: #4fc3f7;
+            background: rgba(79, 195, 247, 0.15);
+        }
+
+        /* 扣分条例面板 */
+        .dept-rules-panel {
+            display: none;
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            margin-bottom: 30px;
+        }
+
+        .dept-rules-panel.show {
+            display: block;
+        }
+
+        .dept-rules-panel .dept-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #ff9800;
+        }
+
+        .dept-rules-panel .dept-header .dept-icon-lg {
+            font-size: 28px;
+            margin-right: 14px;
+        }
+
+        .dept-rules-panel .dept-header h3 {
+            font-size: 22px;
+            color: #1a3a5c;
+        }
+
+        .dept-rules-panel .dept-header .dept-subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-left: 10px;
+        }
+
+        .rules-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .rules-table thead th {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: bold;
+            color: #1a3a5c;
+            border-bottom: 2px solid #e0e0e0;
+            white-space: nowrap;
+        }
+
+        .rules-table tbody td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+        }
+
+        .rules-table tbody tr:hover {
+            background: #fff8e1;
+        }
+
+        .rules-table .rule-id {
+            color: #999;
+            font-size: 12px;
+            width: 44px;
+        }
+
+        .rules-table .rule-title {
+            font-weight: bold;
+            color: #1a3a5c;
+            white-space: nowrap;
+        }
+
+        .rules-table .rule-points {
+            color: #e74c3c;
+            font-weight: bold;
+            text-align: center;
+            width: 80px;
+            white-space: nowrap;
+        }
+
         /* 模态弹窗遮罩 */
         .college-modal-overlay {
             display: none;
@@ -527,11 +667,31 @@
         </div>
 
         <nav class="sidebar-nav" id="sidebarNav">
+            <!-- 首页 -->
+            <div class="dept-nav-item home-item active" data-dept="首页" onclick="switchDept('首页', this)">
+                <span class="dept-icon">🏠</span>首页
+            </div>
+
             <!-- 学院分布统一入口 -->
             <div class="college-dist-entry" onclick="openCollegeModal()">
                 <span class="icon">🏛️</span>
                 <span class="entry-text">学院分布</span>
                 <span class="entry-hint">点击查看</span>
+            </div>
+
+            <!-- 部门导航 -->
+            <div class="dept-section-title">📋 部门导航 · 扣分条例</div>
+            <div class="dept-nav-item" data-dept="安教部" onclick="switchDept('安教部', this)">
+                <span class="dept-icon">🛡️</span>安教部
+            </div>
+            <div class="dept-nav-item" data-dept="社区服务部" onclick="switchDept('社区服务部', this)">
+                <span class="dept-icon">🏘️</span>社区服务部
+            </div>
+            <div class="dept-nav-item" data-dept="学习部" onclick="switchDept('学习部', this)">
+                <span class="dept-icon">📖</span>学习部
+            </div>
+            <div class="dept-nav-item" data-dept="院团委组织部" onclick="switchDept('院团委组织部', this)">
+                <span class="dept-icon">🏅</span>院团委组织部
             </div>
         </nav>
 
@@ -642,10 +802,168 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 部门扣分条例面板 -->
+            <div class="dept-rules-panel" id="deptRulesPanel">
+                <div class="dept-header">
+                    <span class="dept-icon-lg" id="deptIcon">📖</span>
+                    <h3 id="deptTitle">学习部</h3>
+                    <span class="dept-subtitle" id="deptSubtitle">扣分条例</span>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="rules-table">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>条目标题</th>
+                                <th>扣分内容</th>
+                                <th>扣分值</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rulesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
 
     <script>
+        // ========== 部门扣分条例数据 ==========
+        const deptRulesData = {
+            '安教部': {
+                icon: '🛡️', subtitle: '安全管理 · 扣分条例',
+                rules: [
+                    { title: '堵塞消防通道', content: '走廊、过道堆放雨伞、鞋架、衣架、垃圾等杂物，堵塞消防通道', points: '0.5分/人次' },
+                    { title: '楼道晾晒违规', content: '楼道晾晒衣物，遮挡逃生视线，或低于门口标识红线', points: '0.2分/人次' },
+                    { title: '未按时销名', content: '查房时不在寝室且未登记，未按时销名', points: '0.2分/项次' },
+                    { title: '未按规定熄灯', content: '周日至周四晚23:00后没有按时熄灯', points: '0.2分/项次' },
+                    { title: '存放纸牌酒瓶', content: '宿舍存放纸牌、酒瓶，未涉及赌博、饮酒行为', points: '0.2分/项次' },
+                    { title: '宿舍存在明显烟味', content: '宿舍无烟头，但存在明显烟味', points: '0.2分/人次' },
+                    { title: '男女生串寝（班级周评）', content: '发生男女生串寝，同时个人予以处分', points: '3分/人次' },
+                    { title: '严重违纪（班级周评）', content: '使用违规电器、吸烟（发现烟头）、私拉电线、携带管制刀具等严重违纪行为', points: '2分/人次' },
+                    { title: '其他违纪累计扣分（1-2人次）', content: '当周其他违纪累计 1–2 人次', points: '1分' },
+                    { title: '其他违纪累计扣分（3-5人次）', content: '当周其他违纪累计 3–5 人次', points: '1.5分' },
+                    { title: '其他违纪累计扣分（6-8人次）', content: '当周其他违纪累计 6–8 人次', points: '3分' },
+                    { title: '其他违纪累计扣分（9-11人次）', content: '当周其他违纪累计 9–11 人次', points: '4.5分' },
+                    { title: '其他违纪累计递增规则', content: '当周违纪人次超过11人，每新增3人次，增加扣分1.5分', points: '递增' },
+                    { title: '宿舍未熄灯单独统计', content: '宿舍未按要求熄灯，单独统计考核', points: '1分/间次' }
+                ]
+            },
+            '社区服务部': {
+                icon: '🏘️', subtitle: '社区服务 · 扣分条例',
+                rules: [
+                    { title: '客厅垃圾桶违规', content: '客厅垃圾桶，包含已经打包但是没有丢掉的垃圾', points: '1分/个' },
+                    { title: '行李架物品摆放杂乱', content: '行李架上面物品摆放不整齐', points: '3分' },
+                    { title: '客厅鞋架鞋子杂乱', content: '客厅鞋架上面鞋子摆放不整齐', points: '3分' },
+                    { title: '客厅柜门未关闭', content: '客厅柜门没有关上；柜门关不上的情况不扣分', points: '1分' },
+                    { title: '客厅地板存在垃圾', content: '客厅地板有一处及以上垃圾，整团头发算作垃圾', points: '1分' },
+                    { title: '房间垃圾桶过满', content: '房间垃圾桶已满或者超过三分之二', points: '1分/个' },
+                    { title: '桌面未整理', content: '房间桌子没有整理', points: '1分/个' },
+                    { title: '房间地板有垃圾', content: '房间地板上面存在垃圾', points: '1分' },
+                    { title: '床边悬挂杂物', content: '床的周围悬挂东西', points: '1分/个' },
+                    { title: '房间窗槽脏乱', content: '房间窗槽脏乱', points: '1分' },
+                    { title: '天花板悬挂杂物', content: '天花板上面悬挂物品', points: '1分/个' },
+                    { title: '房间打包垃圾未丢弃', content: '房间内打包好的垃圾没有丢掉', points: '1分/个' },
+                    { title: '窗台摆放杂物', content: '窗台上放置物品', points: '1分/个' },
+                    { title: '鞋盒鞋子摆放凌乱', content: '鞋子、鞋盒摆放凌乱', points: '1分/个' },
+                    { title: '空调外机悬挂物品', content: '空调外机上面悬挂东西', points: '1分/个' },
+                    { title: '阳台地板存在垃圾', content: '阳台地板有一处垃圾，头发、纸团都算垃圾', points: '1分/个' },
+                    { title: '阳台卫生工具摆放不清', content: '阳台卫生工具没有摆放整齐清楚', points: '1分/个' },
+                    { title: '阳台栏杆等处摆放物品', content: '窗边、阳台栏杆、空调外机上面摆放物品', points: '1分/个' },
+                    { title: '厕所地板存在垃圾', content: '厕所地板有一处垃圾', points: '1分/个' },
+                    { title: '厕所窗槽脏乱', content: '厕所窗槽脏乱', points: '1分' },
+                    { title: '洗衣槽脏乱', content: '洗衣槽脏乱', points: '1分' },
+                    { title: '拖把槽脏乱', content: '拖把槽脏乱', points: '1分' },
+                    { title: '下水道堵塞', content: '下水道口堵塞', points: '0.5分/个' },
+                    { title: '喷头未挂放', content: '喷头垂落，没有挂好', points: '0.5分/个' },
+                    { title: '厕所垃圾桶过满', content: '厕所垃圾桶已满或者超过三分之二', points: '1分/个' },
+                    { title: '蹲位脏乱', content: '蹲位明显脏乱', points: '1分/个' },
+                    { title: '厕所卫生工具不齐', content: '厕所卫生工具没有摆放整齐', points: '2分' },
+                    { title: '洗漱用品摆放杂乱', content: '洗漱架上洗漱用品摆放不整齐', points: '2分' },
+                    { title: '洗漱架积灰', content: '洗漱架上面有灰尘', points: '2分' },
+                    { title: '黑板槽未水洗', content: '黑板槽没有水洗清洁', points: '1分' },
+                    { title: '黑板未水洗', content: '黑板没有水洗清洁', points: '1分' },
+                    { title: '讲台桌面积灰', content: '讲台桌面有灰尘', points: '1分' },
+                    { title: '讲台桌面杂乱', content: '讲台桌面杂乱无章', points: '1分' },
+                    { title: '教室垃圾桶超三分之二', content: '教室垃圾桶内垃圾超过三分之二', points: '1分' },
+                    { title: '教室垃圾桶垃圾过半', content: '教室垃圾桶垃圾在三分之一至二分之一之间', points: '2分' },
+                    { title: '教室卫生工具杂乱', content: '卫生角工具摆放杂乱', points: '2分' },
+                    { title: '地板少量垃圾', content: '教室地板垃圾三处以上、五处以下', points: '1分' },
+                    { title: '地板较多垃圾', content: '教室地板垃圾五处以上', points: '3分' },
+                    { title: '抽屉少量垃圾', content: '抽屉垃圾三处以上、五处以下', points: '1分' },
+                    { title: '抽屉较多垃圾', content: '抽屉垃圾五处以上', points: '3分' }
+                ]
+            },
+            '学习部': {
+                icon: '📖', subtitle: '学风建设 · 扣分条例',
+                rules: [
+                    { title: '迟到早退', content: '出现迟到、早退行为', points: '0.5分' },
+                    { title: '旷课缺勤', content: '旷课、旷点、缺勤', points: '1分' },
+                    { title: '课堂违纪', content: '玩手机、戴耳机、携带吸管饮料（水杯自带吸管允许）、奶茶、穿拖鞋（洞洞鞋必须扣上后带）、讲话、携带零食、未经辅导员同意自带电脑进班级', points: '0.25分' },
+                    { title: '假单未销', content: '假单没有按时销假', points: '3分' },
+                    { title: '晚点评价为良', content: '晚点项目周评，评定等级为良', points: '3分' },
+                    { title: '晚点评价为差', content: '晚点项目周评，评定等级为差', points: '6分' },
+                    { title: '开单 0–1 分', content: '班级开单总分 0–1 分（含1分）', points: '3分' },
+                    { title: '开单 1–3 分', content: '班级开单总分大于1分、小于等于3分', points: '6分' },
+                    { title: '开单 3–5 分', content: '班级开单总分大于3分、小于等于5分', points: '9分' },
+                    { title: '开单 5–8 分', content: '班级开单总分大于5分、小于等于8分', points: '12分' },
+                    { title: '开单 8–12 分', content: '班级开单总分大于8分、小于等于12分', points: '15分' },
+                    { title: '开单 12 分以上', content: '班级开单总分超过 12 分', points: '20分' }
+                ]
+            },
+            '院团委组织部': {
+                icon: '🏅', subtitle: '团委组织 · 扣分条例',
+                rules: [
+                    { title: '团活动着装与纪律违规', content: '团日、推优未佩戴团徽校徽，唱国歌团歌不张嘴；违规着装；团课场合玩手机、交头接耳；每学年累计超过2次，每项每次扣分；累计超5次不得评为当年优秀团员', points: '0.25分' },
+                    { title: '团集体活动出勤违纪', content: '团会、团校、青马班、志愿、线上团日迟到早退、不认真、无故缺席；无有效批假视为旷会；每学年累计超2次，每项每次扣分；累计超1次不得评为当年优秀团员', points: '0.5分' },
+                    { title: '志愿时长不达标', content: '团员一学年志愿时长补考之后依旧不足 40 小时，当年团员等级不能评为优秀', points: '限制评优' }
+                ]
+            }
+        };
+
+        // 切换部门
+        function switchDept(deptName, el) {
+            document.querySelectorAll('.dept-nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+
+            if (deptName === '首页') {
+                document.getElementById('heroBanner').style.display = 'block';
+                document.getElementById('infoPanel').classList.remove('show');
+                document.getElementById('deptRulesPanel').classList.remove('show');
+                document.getElementById('breadcrumbCurrent').textContent = '福建卫生职业技术学院';
+                document.querySelector('.section-title').style.display = 'block';
+                document.querySelector('.college-cards').style.display = 'grid';
+                return;
+            }
+
+            const data = deptRulesData[deptName];
+            if (!data) return;
+
+            document.getElementById('heroBanner').style.display = 'none';
+            document.getElementById('infoPanel').classList.remove('show');
+            document.querySelector('.section-title').style.display = 'none';
+            document.querySelector('.college-cards').style.display = 'none';
+
+            document.getElementById('deptIcon').textContent = data.icon;
+            document.getElementById('deptTitle').textContent = deptName;
+            document.getElementById('deptSubtitle').textContent = data.subtitle;
+            document.getElementById('breadcrumbCurrent').textContent = '部门导航 › ' + deptName;
+
+            const tbody = document.getElementById('rulesTableBody');
+            tbody.innerHTML = data.rules.map((r, i) =>
+                `<tr>
+                    <td class="rule-id">${i + 1}</td>
+                    <td class="rule-title">${r.title}</td>
+                    <td>${r.content}</td>
+                    <td class="rule-points">${r.points}</td>
+                </tr>`
+            ).join('');
+
+            const panel = document.getElementById('deptRulesPanel');
+            panel.classList.add('show');
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
         // 打开学院分布弹窗
         function openCollegeModal() {
             document.getElementById('collegeModal').classList.add('show');
@@ -692,7 +1010,6 @@
 
             document.getElementById('heroBanner').style.display = 'none';
 
-            // 选中专业后关闭弹窗
             document.getElementById('collegeModal').classList.remove('show');
             document.body.style.overflow = '';
 
@@ -713,7 +1030,10 @@
             });
             document.getElementById('breadcrumbCurrent').textContent = collegeName;
             document.getElementById('infoPanel').classList.remove('show');
+            document.getElementById('deptRulesPanel').classList.remove('show');
             document.getElementById('heroBanner').style.display = 'block';
+            document.querySelector('.section-title').style.display = 'block';
+            document.querySelector('.college-cards').style.display = 'grid';
         }
 
         // 获取专业描述
