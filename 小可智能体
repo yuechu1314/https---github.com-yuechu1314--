@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; margin: 0; padding: 8px; }
+    </style>
+    <iframe id="coze-web-sdk" src="https://sdk.coze.site"></iframe>
+    <script>
+      const cozeWebSDK = document.getElementById("coze-web-sdk");
+      // sdk origin
+      const COZE_WEB_SDK_ORIGIN = 'https://sdk.coze.site';
+      window.addEventListener('message', (event) => {
+        // 只处理来自 sdk 的消息
+        if (event.origin !== COZE_WEB_SDK_ORIGIN) {
+          return;
+        }
+        const data = event.data;
+        // sdk 资源加载完成的通知，所有消息都必须在此后发送才有效
+        if (data.type === 'IFRAME_READY') {
+          // 必须步骤：初始化 web SDK
+          cozeWebSDK.contentWindow.postMessage({
+            type: 'INIT',
+            payload: {
+              token: '<YOUR_TOKEN>',
+              projectId: '7703769752451399722',
+            }
+          }, COZE_WEB_SDK_ORIGIN);
+        }
+        // token 过期的通知
+        if (data.type === 'TOKEN_EXPIRED') {
+          // 更新 token
+          cozeWebSDK.contentWindow.postMessage({
+            type: 'UPDATE_TOKEN',
+            payload: {
+              token: '<YOUR_TOKEN>',
+            }
+          }, COZE_WEB_SDK_ORIGIN);
+        }
+      });
+    </script>
+  </body>
+</html>
