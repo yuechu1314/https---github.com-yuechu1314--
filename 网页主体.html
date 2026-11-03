@@ -1,3 +1,4 @@
+d:\https---github.com-yuechu1314--\网页主体.html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -287,6 +288,80 @@
             .hero-stats { width: 100%; justify-content: space-around; }
             .stats-row { grid-template-columns: 1fr; }
         }
+
+        /* ========== 小可智能体 ========== */
+        .xiao-ke-btn {
+            position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: linear-gradient(135deg, #4fc3f7, #2196F3);
+            box-shadow: 0 4px 18px rgba(33,150,243,0.35);
+            border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; color: #fff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: bounceIn 0.5s ease;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .xiao-ke-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 24px rgba(33,150,243,0.45);
+        }
+        .xiao-ke-btn .badge {
+            position: absolute; top: -4px; right: -4px;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #4caf50; border: 2px solid #fff;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(76,175,80,0.6); }
+            50% { box-shadow: 0 0 0 8px rgba(76,175,80,0); }
+        }
+        .xiao-ke-wrapper {
+            position: fixed; bottom: 100px; right: 28px; z-index: 9998;
+            width: 420px; height: 600px; max-height: calc(100vh - 140px);
+            border-radius: 18px; overflow: hidden;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+            display: none; flex-direction: column;
+            animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .xiao-ke-wrapper.open { display: flex; }
+        .xiao-ke-header {
+            background: linear-gradient(135deg, #14273d, #1a3a5c);
+            padding: 14px 18px; display: flex; align-items: center;
+            justify-content: space-between; flex-shrink: 0;
+        }
+        .xiao-ke-header .header-left { display: flex; align-items: center; gap: 10px; }
+        .xiao-ke-header .avatar {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: linear-gradient(135deg, #4fc3f7, #2196F3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #fff;
+        }
+        .xiao-ke-header .title { color: #fff; font-size: 15px; font-weight: bold; }
+        .xiao-ke-header .subtitle { color: rgba(255,255,255,0.55); font-size: 11px; }
+        .xiao-ke-header .close-btn {
+            width: 30px; height: 30px; border-radius: 50%;
+            background: rgba(255,255,255,0.1); border: none; cursor: pointer;
+            color: rgba(255,255,255,0.7); font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .xiao-ke-header .close-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+        .xiao-ke-wrapper iframe { flex: 1; border: none; width: 100%; }
+
+        @media (max-width: 480px) {
+            .xiao-ke-wrapper { width: calc(100vw - 24px); right: 12px; left: 12px; height: 500px; }
+            .xiao-ke-btn { bottom: 16px; right: 16px; width: 52px; height: 52px; font-size: 24px; }
+        }
     </style>
 </head>
 <body>
@@ -368,6 +443,23 @@
             </div>
         </div>
     </main>
+
+    <!-- ==================== 小可智能体 ==================== -->
+    <button class="xiao-ke-btn" id="xiaoKeBtn" title="和小可聊天">🤖<span class="badge"></span></button>
+
+    <div class="xiao-ke-wrapper" id="xiaoKeWrapper">
+        <div class="xiao-ke-header">
+            <div class="header-left">
+                <div class="avatar">🤖</div>
+                <div>
+                    <div class="title">小可智能体</div>
+                    <div class="subtitle">AI 校园助手 · 随时为你解答</div>
+                </div>
+            </div>
+            <button class="close-btn" id="xiaoKeClose">✕</button>
+        </div>
+        <iframe id="coze-web-sdk" src="https://sdk.coze.site"></iframe>
+    </div>
 
     <script>
     const collegeData = {
@@ -553,6 +645,55 @@
         p.classList.add('show');
         p.scrollIntoView({behavior:'smooth',block:'start'});
     }
+    </script>
+
+    <!-- ==================== 小可智能体 SDK 脚本 ==================== -->
+    <script>
+    (function() {
+        var btn = document.getElementById('xiaoKeBtn');
+        var wrapper = document.getElementById('xiaoKeWrapper');
+        var closeBtn = document.getElementById('xiaoKeClose');
+        var iframe = document.getElementById('coze-web-sdk');
+        var COZE_WEB_SDK_ORIGIN = 'https://sdk.coze.site';
+        var isOpen = false;
+
+        function openChat() {
+            isOpen = true;
+            wrapper.classList.add('open');
+            btn.style.display = 'none';
+        }
+
+        function closeChat() {
+            isOpen = false;
+            wrapper.classList.remove('open');
+            btn.style.display = 'flex';
+        }
+
+        btn.addEventListener('click', openChat);
+        closeBtn.addEventListener('click', closeChat);
+
+        window.addEventListener('message', function(event) {
+            if (event.origin !== COZE_WEB_SDK_ORIGIN) return;
+            var data = event.data;
+            if (data.type === 'IFRAME_READY') {
+                iframe.contentWindow.postMessage({
+                    type: 'INIT',
+                    payload: {
+                        token: '<eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1MzU2MDhjLTdlMWUtNGU3Ni1hOTM0LTUxYWZhMTViODVmNiJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbIm5zSXhkeng1bU9ZUWFNaWJHZ2dNcTJ6ekxTWnlsUW9vIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzkzNzE0Mzg3LCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NzAzODAyMjUxOTc3OTQ5MjQ3Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NzAzOTQ0NjMyODQ5MTM3NjkwIn0.CmQNP4rifrNFJUIRgHo0OLuil-H8ZwcTY2BtrEfA76zl5AsTKvSvIssNxqNhfhHn3psVxEkmTlfjXgCJWvn_iQKUvF8NCLiPerZl4_Zc1nm-L6rBwlaXzVAuAyc0F9QetScNlEXUjp1ONrpsFwExHUC2WUydvO60NxZpb7iAOA6dksZD2w0R6wegte2SX-Lwy6ikb2gB6zpqKGudduWjI7OwDtHjpEqFfyz3DepPuIAMc7K7SRpilUdxqc6xbkeu-ckiBtFoWok4PrtznGthJSe2nu4RWnIIYX37sOG-TOeBkqDT5VKn48SZLXKuydhjLJdFvjy1p9jk_6Vu6idvAQ>',
+                        projectId: '7703769752451399722'
+                    }
+                }, COZE_WEB_SDK_ORIGIN);
+            }
+            if (data.type === 'TOKEN_EXPIRED') {
+                iframe.contentWindow.postMessage({
+                    type: 'UPDATE_TOKEN',
+                    payload: {
+                        token: '<eyJhbGciOiJSUzI1NiIsImtpZCI6ImE1MzU2MDhjLTdlMWUtNGU3Ni1hOTM0LTUxYWZhMTViODVmNiJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbIm5zSXhkeng1bU9ZUWFNaWJHZ2dNcTJ6ekxTWnlsUW9vIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzkzNzE0Mzg3LCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NzAzODAyMjUxOTc3OTQ5MjQ3Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NzAzOTQ0NjMyODQ5MTM3NjkwIn0.CmQNP4rifrNFJUIRgHo0OLuil-H8ZwcTY2BtrEfA76zl5AsTKvSvIssNxqNhfhHn3psVxEkmTlfjXgCJWvn_iQKUvF8NCLiPerZl4_Zc1nm-L6rBwlaXzVAuAyc0F9QetScNlEXUjp1ONrpsFwExHUC2WUydvO60NxZpb7iAOA6dksZD2w0R6wegte2SX-Lwy6ikb2gB6zpqKGudduWjI7OwDtHjpEqFfyz3DepPuIAMc7K7SRpilUdxqc6xbkeu-ckiBtFoWok4PrtznGthJSe2nu4RWnIIYX37sOG-TOeBkqDT5VKn48SZLXKuydhjLJdFvjy1p9jk_6Vu6idvAQ>'
+                    }
+                }, COZE_WEB_SDK_ORIGIN);
+            }
+        });
+    })();
     </script>
 </body>
 </html>
