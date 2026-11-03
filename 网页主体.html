@@ -20,7 +20,13 @@
         .college-dist-entry .entry-text { font-size: 16px; font-weight: bold; color: #e0e8f0; }
         .college-dist-entry .entry-hint { margin-left: auto; font-size: 11px; color: rgba(255,255,255,0.4); }
 
-        .dept-section-title { padding: 18px 20px 8px; font-size: 12px; color: rgba(255,255,255,0.35); letter-spacing: 2px; }
+        /* 侧边栏部门折叠 */
+        .dept-section-toggle { padding: 14px 20px; font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 2px; cursor: pointer; user-select: none; display: flex; align-items: center; transition: color 0.2s ease; }
+        .dept-section-toggle:hover { color: rgba(255,255,255,0.8); }
+        .dept-section-toggle .toggle-arrow { font-size: 10px; margin-right: 8px; transition: transform 0.3s ease; display: inline-block; }
+        .dept-section-toggle.open .toggle-arrow { transform: rotate(90deg); }
+        .dept-items-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .dept-items-wrapper.open { max-height: 300px; }
         .dept-nav-item { display: flex; align-items: center; padding: 12px 20px; margin: 3px 8px; cursor: pointer; font-size: 14px; color: #b0c4d8; border-radius: 8px; border-left: 3px solid transparent; transition: all 0.25s ease; user-select: none; }
         .dept-nav-item:hover { background: rgba(255,255,255,0.08); border-left-color: #ff9800; color: #fff; }
         .dept-nav-item.active { background: rgba(255,152,0,0.15); border-left-color: #ff9800; color: #ff9800; font-weight: bold; }
@@ -29,25 +35,14 @@
         .dept-nav-item.home-item:hover { border-left-color: #4fc3f7; }
         .dept-nav-item.home-item.active { border-left-color: #4fc3f7; color: #4fc3f7; background: rgba(79,195,247,0.15); }
 
-        /* 部门扣分条例手风琴 */
-        .dept-rules-accordion { display: none; margin-bottom: 30px; }
-        .dept-rules-accordion.show { display: block; }
-        .dept-rules-section-title { font-size: 20px; font-weight: bold; color: #1a3a5c; margin-bottom: 20px; padding-left: 12px; border-left: 4px solid #ff9800; }
-        .dept-accordion-item { background: #fff; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; transition: all 0.3s ease; }
-        .dept-accordion-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-        .dept-accordion-header { display: flex; align-items: center; padding: 18px 22px; cursor: pointer; user-select: none; transition: background 0.2s ease; border-left: 4px solid transparent; }
-        .dept-accordion-header:hover { background: #fafbfc; }
-        .dept-accordion-item.open .dept-accordion-header { border-left-color: #ff9800; background: #fff8e1; }
-        .dept-accordion-header .dept-acc-icon { font-size: 24px; margin-right: 14px; }
-        .dept-accordion-header .dept-acc-info { flex: 1; }
-        .dept-accordion-header .dept-acc-name { font-size: 17px; font-weight: bold; color: #1a3a5c; }
-        .dept-accordion-header .dept-acc-sub { font-size: 12px; color: #999; margin-top: 2px; }
-        .dept-accordion-header .dept-acc-count { font-size: 13px; color: #ff9800; font-weight: bold; background: #fff3e0; padding: 4px 12px; border-radius: 14px; margin-right: 10px; }
-        .dept-accordion-header .dept-acc-arrow { font-size: 14px; color: #999; transition: transform 0.3s ease; }
-        .dept-accordion-item.open .dept-acc-arrow { transform: rotate(180deg); color: #ff9800; }
-        .dept-accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; }
-        .dept-accordion-item.open .dept-accordion-body { max-height: 2000px; }
-        .dept-accordion-body-inner { padding: 0 22px 20px; }
+        /* 单部门扣分条例面板 */
+        .dept-rules-panel { display: none; background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 30px; }
+        .dept-rules-panel.show { display: block; }
+        .dept-rules-panel .dept-header { display: flex; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #ff9800; }
+        .dept-rules-panel .dept-header .dept-icon-lg { font-size: 28px; margin-right: 14px; }
+        .dept-rules-panel .dept-header h3 { font-size: 22px; color: #1a3a5c; }
+        .dept-rules-panel .dept-header .dept-subtitle { font-size: 13px; color: #999; margin-left: 10px; }
+        .dept-rules-panel .dept-rule-count { font-size: 13px; color: #ff9800; margin-left: auto; background: #fff3e0; padding: 4px 14px; border-radius: 14px; font-weight: bold; }
         .rules-table { width: 100%; border-collapse: collapse; font-size: 14px; }
         .rules-table thead th { background: #f8f9fa; padding: 12px 16px; text-align: left; font-weight: bold; color: #1a3a5c; border-bottom: 2px solid #e0e0e0; white-space: nowrap; }
         .rules-table tbody td { padding: 10px 16px; border-bottom: 1px solid #f0f0f0; color: #555; }
@@ -168,11 +163,13 @@
         <nav class="sidebar-nav" id="sidebarNav">
             <div class="dept-nav-item home-item active" data-dept="首页" onclick="switchDept('首页', this)"><span class="dept-icon">🏠</span>首页</div>
             <div class="college-dist-entry" onclick="openCollegeModal()"><span class="icon">🏛️</span><span class="entry-text">学院分布</span><span class="entry-hint">点击查看</span></div>
-            <div class="dept-section-title">📋 部门导航 · 扣分条例</div>
+            <div class="dept-section-toggle" onclick="toggleDeptSection(this)"><span class="toggle-arrow">▶</span>📋 部门导航 · 扣分条例</div>
+            <div class="dept-items-wrapper" id="deptItemsWrapper">
             <div class="dept-nav-item" data-dept="安教部" onclick="switchDept('安教部', this)"><span class="dept-icon">🛡️</span>安教部</div>
             <div class="dept-nav-item" data-dept="社区服务部" onclick="switchDept('社区服务部', this)"><span class="dept-icon">🏘️</span>社区服务部</div>
             <div class="dept-nav-item" data-dept="学习部" onclick="switchDept('学习部', this)"><span class="dept-icon">📖</span>学习部</div>
             <div class="dept-nav-item" data-dept="院团委组织部" onclick="switchDept('院团委组织部', this)"><span class="dept-icon">🏅</span>院团委组织部</div>
+            </div>
         </nav>
         <div class="sidebar-footer">© 2026 福建卫职院百事通</div>
     </aside>
@@ -217,10 +214,10 @@
                 <div class="college-card" onclick="scrollToCollege('公共卫生与健康管理学院')"><div class="card-header"><div class="card-icon health">🌿</div><div><h3>公共卫生与健康管理学院</h3><div class="major-count">8 个专业</div></div></div><div class="major-tags"><span class="major-tag">预防医学</span><span class="major-tag">卫生信息管理</span><span class="major-tag">健康管理</span><span class="major-tag">公共卫生管理</span><span class="major-tag">医学营养</span><span class="major-tag">健康大数据管理与服务</span><span class="major-tag">体育保健与康复</span><span class="major-tag">婴幼儿托育服务与管理</span></div></div>
             </div>
 
-            <!-- 部门扣分条例手风琴 -->
-            <div class="dept-rules-accordion" id="deptRulesAccordion">
-                <div class="dept-rules-section-title">📋 部门扣分条例汇总</div>
-                <div id="accordionContainer"></div>
+            <!-- 部门扣分条例面板 -->
+            <div class="dept-rules-panel" id="deptRulesPanel">
+                <div class="dept-header"><span class="dept-icon-lg" id="deptIcon">📖</span><h3 id="deptTitle">学习部</h3><span class="dept-subtitle" id="deptSubtitle">扣分条例</span><span class="dept-rule-count" id="deptRuleCount">0 条</span></div>
+                <div style="overflow-x:auto;"><table class="rules-table"><thead><tr><th>序号</th><th>条目标题</th><th>扣分内容</th><th>扣分值</th></tr></thead><tbody id="rulesTableBody"></tbody></table></div>
             </div>
         </div>
     </main>
@@ -320,6 +317,11 @@
         ]}
     };
 
+    function toggleDeptSection(el) {
+        el.classList.toggle('open');
+        document.getElementById('deptItemsWrapper').classList.toggle('open');
+    }
+
     function switchDept(deptName, el) {
         document.querySelectorAll('.dept-nav-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
@@ -327,66 +329,28 @@
             document.getElementById('heroBanner').style.display = 'block';
             document.getElementById('statsRow').style.display = 'grid';
             document.getElementById('infoPanel').classList.remove('show');
-            document.getElementById('deptRulesAccordion').classList.remove('show');
+            document.getElementById('deptRulesPanel').classList.remove('show');
             document.getElementById('breadcrumbCurrent').textContent = '福建卫生职业技术学院';
             document.querySelector('.section-title').style.display = 'block';
             document.querySelector('.college-cards').style.display = 'grid';
             return;
         }
+        const data = deptRulesData[deptName];
+        if (!data) return;
         document.getElementById('heroBanner').style.display = 'none';
         document.getElementById('statsRow').style.display = 'none';
         document.getElementById('infoPanel').classList.remove('show');
         document.querySelector('.section-title').style.display = 'none';
         document.querySelector('.college-cards').style.display = 'none';
-        document.getElementById('breadcrumbCurrent').textContent = '部门导航 › 扣分条例汇总';
-        renderAccordion(deptName);
-        const accordion = document.getElementById('deptRulesAccordion');
-        accordion.classList.add('show');
-        accordion.scrollIntoView({behavior:'smooth',block:'start'});
-    }
-
-    function renderAccordion(activeDept) {
-        const container = document.getElementById('accordionContainer');
-        let html = '';
-        for (const [name, data] of Object.entries(deptRulesData)) {
-            const isOpen = (name === activeDept) ? ' open' : '';
-            html += `<div class="dept-accordion-item${isOpen}" data-dept="${name}">
-                <div class="dept-accordion-header" onclick="toggleAccordion(this)">
-                    <span class="dept-acc-icon">${data.icon}</span>
-                    <div class="dept-acc-info">
-                        <div class="dept-acc-name">${name}</div>
-                        <div class="dept-acc-sub">${data.subtitle}</div>
-                    </div>
-                    <span class="dept-acc-count">${data.rules.length} 条</span>
-                    <span class="dept-acc-arrow">▼</span>
-                </div>
-                <div class="dept-accordion-body">
-                    <div class="dept-accordion-body-inner">
-                        <div style="overflow-x:auto;">
-                            <table class="rules-table">
-                                <thead><tr><th>序号</th><th>条目标题</th><th>扣分内容</th><th>扣分值</th></tr></thead>
-                                <tbody>${data.rules.map((r,i) => `<tr><td class="rule-id">${i+1}</td><td class="rule-title">${r.title}</td><td>${r.content}</td><td class="rule-points">${r.points}</td></tr>`).join('')}</tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        }
-        container.innerHTML = html;
-        if (activeDept) {
-            const target = container.querySelector(`.dept-accordion-item[data-dept="${activeDept}"]`);
-            if (target) setTimeout(() => target.scrollIntoView({behavior:'smooth',block:'start'}), 150);
-        }
-    }
-
-    function toggleAccordion(headerEl) {
-        const item = headerEl.parentElement;
-        const isOpen = item.classList.contains('open');
-        document.querySelectorAll('.dept-accordion-item.open').forEach(i => i.classList.remove('open'));
-        if (!isOpen) {
-            item.classList.add('open');
-            setTimeout(() => item.scrollIntoView({behavior:'smooth',block:'nearest'}), 100);
-        }
+        document.getElementById('deptIcon').textContent = data.icon;
+        document.getElementById('deptTitle').textContent = deptName;
+        document.getElementById('deptSubtitle').textContent = data.subtitle;
+        document.getElementById('deptRuleCount').textContent = data.rules.length + ' 条';
+        document.getElementById('breadcrumbCurrent').textContent = '部门导航 › ' + deptName;
+        document.getElementById('rulesTableBody').innerHTML = data.rules.map((r,i) => `<tr><td class="rule-id">${i+1}</td><td class="rule-title">${r.title}</td><td>${r.content}</td><td class="rule-points">${r.points}</td></tr>`).join('');
+        const panel = document.getElementById('deptRulesPanel');
+        panel.classList.add('show');
+        panel.scrollIntoView({behavior:'smooth',block:'start'});
     }
 
     function openCollegeModal(){ document.getElementById('collegeModal').classList.add('show'); document.body.style.overflow='hidden'; }
@@ -413,7 +377,7 @@
         document.querySelectorAll('#collegeModalBody .college-group').forEach(g=>{ if(g.getAttribute('data-college')===collegeName){ g.classList.add('open'); setTimeout(()=>g.scrollIntoView({behavior:'smooth',block:'start'}),100); } });
         document.getElementById('breadcrumbCurrent').textContent=collegeName;
         document.getElementById('infoPanel').classList.remove('show');
-        document.getElementById('deptRulesAccordion').classList.remove('show');
+        document.getElementById('deptRulesPanel').classList.remove('show');
         document.getElementById('heroBanner').style.display='block';
         document.getElementById('statsRow').style.display='grid';
         document.querySelector('.section-title').style.display='block';
