@@ -1204,7 +1204,12 @@
     const XK_SDK_ORIGIN = 'https://sdk.coze.site';
     const XK_PROJECT_ID = '7703769752451399722';
     // ⚠️ 令牌写在前端，任何人查看源码都能拿到；演示结束后请去扣子后台重置
-    const XK_SDK_TOKEN = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjI0YzRiODNiLWM0N2MtNGY1Ni05YjdhLTNmODhmNTNmNGY3YyJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbIm5zSXhkeng1bU9ZUWFNaWJHZ2dNcTJ6ekxTWnlsUW9vIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzkzODA5Nzk5LCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NzAzODAyMjUxOTc3OTQ5MjQ3Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NzA0MzU0NDI1OTYzMjgyNDUxIn0.PeAfX7T-Cvvz09T0_LupFj1K1n2C8QbCB44ZtwtWpKFzARcXb-PRHYnE-OKo2APwIVmiQdC6jbnpxI4eeSsQs1fpChYqkCEZ8CqST_w7-3q3pein_p4dpzT1cCUgQx5t5eES6VwwiT4wccHoUM_qHuzhrvpwX3qG234cLCAOucCzUm4lRptowWS0_nvWIXp9rJAKs3B9T4I-wspGhWdmr2MkW0lmzAqUZdIF2kQqOSAYhx5FGJY_39I4_9RDnM81YLW1xUh3rtMnvLPZzqyczbHN_RCL2NR1oSNencNMAWdxCIsuJNG5ingcOROCQR7Dx4eSU3Y4DxTXsSQj4oHQ_w';
+    // 令牌不写死在仓库里：优先读本机保存的（在「小可SDK测试.html」里填一次就会存到这里）
+    // 要发布成公网可用，把下面的 YOUR_TOKEN 换成真实令牌，并注意这等于公开
+    const XK_SDK_TOKEN = (function () {
+        try { var saved = localStorage.getItem('xk_wsdk_token'); if (saved) return saved; } catch (e) {}
+        return 'YOUR_TOKEN';
+    })();
     let xkLoaded = false;
     let xkLoadingStarted = false;
     let xkHintTimer = null;
@@ -1235,6 +1240,15 @@
         const loading = document.getElementById('xkLoading');
         const hint = document.getElementById('xkHint');
         if (!frame || !loading) return;
+
+        // 没配置令牌：不发起请求，直接给出说明
+        if (!XK_SDK_TOKEN || XK_SDK_TOKEN === 'YOUR_TOKEN') {
+            loading.classList.remove('hide');
+            loading.innerHTML = '<div style="font-size:13px;line-height:2;text-align:center;">还没有配置访问令牌<br>' +
+                '<span style="font-size:12px;color:#8d95b3;">双击「小可SDK测试.html」填一次令牌，这里会自动用上</span></div>';
+            xkLoadingStarted = false;
+            return;
+        }
 
         loading.classList.remove('hide');
         hint.classList.remove('show');
