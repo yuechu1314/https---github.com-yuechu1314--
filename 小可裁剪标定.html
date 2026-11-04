@@ -9,12 +9,12 @@
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
                  font-family: "Microsoft YaHei","微软雅黑",Arial,sans-serif; color: var(--ink); background: #eef1f9; }
-    .bar { position: fixed; left: 0; right: 0; top: 0; height: 64px; z-index: 10;
-           display: flex; align-items: center; gap: 18px; padding: 0 18px;
+    .bar { position: fixed; left: 0; right: 0; top: 0; z-index: 10; min-height: 56px;
+           display: flex; align-items: center; flex-wrap: wrap; gap: 14px; padding: 10px 18px;
            background: #fff; box-shadow: 0 2px 14px rgba(51,75,131,0.10); }
     .title { font-size: 14px; font-weight: bold; color: var(--blue-deep); white-space: nowrap; }
     .ctrl { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
-    input[type=range] { width: 190px; accent-color: #334b83; }
+    input[type=range] { width: 150px; accent-color: #334b83; }
     .val { display: inline-block; min-width: 56px; font-weight: bold; color: var(--blue-deep); }
     button { border: 0; cursor: pointer; font-size: 13px; font-weight: bold; padding: 9px 18px; border-radius: 999px;
              font-family: inherit; color: #fff; background: linear-gradient(135deg, var(--blue-mid), var(--blue-deep));
@@ -37,6 +37,7 @@
     <div class="title">小可 · 显示区域标定</div>
     <div class="ctrl">左裁切 <input type="range" id="left" min="0" max="1200" step="4" value="420"><span class="val" id="leftVal">420px</span></div>
     <div class="ctrl">上裁切 <input type="range" id="top" min="0" max="600" step="4" value="0"><span class="val" id="topVal">0px</span></div>
+    <div class="ctrl">下裁切 <input type="range" id="bottom" min="0" max="600" step="4" value="0"><span class="val" id="bottomVal">0px</span></div>
     <button onclick="save()">保存到本机</button>
     <button class="ghost" onclick="reset()">恢复默认</button>
 </div>
@@ -52,6 +53,7 @@
     var stage = document.getElementById('stage');
     var leftEl = document.getElementById('left');
     var topEl = document.getElementById('top');
+    var bottomEl = document.getElementById('bottom');
 
     function num(k, d) {
         try { var v = parseInt(localStorage.getItem(k), 10); if (!isNaN(v) && v >= 0) return v; } catch (e) {}
@@ -61,30 +63,33 @@
     function apply() {
         var l = parseInt(leftEl.value, 10);
         var t = parseInt(topEl.value, 10);
+        var b = parseInt(bottomEl.value, 10);
         document.getElementById('leftVal').textContent = l + 'px';
         document.getElementById('topVal').textContent = t + 'px';
+        document.getElementById('bottomVal').textContent = b + 'px';
         // iframe 往左上挪，容器 overflow 裁掉挪出去的部分
         frame.style.left = (-l) + 'px';
         frame.style.top = (-t) + 'px';
         frame.style.width = (stage.clientWidth + l) + 'px';
-        frame.style.height = (stage.clientHeight + t) + 'px';
+        frame.style.height = (stage.clientHeight + t + b) + 'px';
     }
 
     function save() {
         try {
             localStorage.setItem('xk_crop_left', leftEl.value);
             localStorage.setItem('xk_crop_top', topEl.value);
+            localStorage.setItem('xk_crop_bottom', bottomEl.value);
             document.getElementById('hintbar').textContent =
-                '已保存：左 ' + leftEl.value + 'px / 上 ' + topEl.value + 'px —— 回主页 Ctrl+F5 生效';
+                '已保存：左 ' + leftEl.value + ' / 上 ' + topEl.value + ' / 下 ' + bottomEl.value + ' px —— 回主页 Ctrl+F5 生效';
         } catch (e) {
             document.getElementById('hintbar').textContent =
-                '保存失败（浏览器限制），把这两个数告诉作者：左 ' + leftEl.value + ' / 上 ' + topEl.value;
+                '保存失败（浏览器限制），把这三个数告诉作者：左 ' + leftEl.value + ' / 上 ' + topEl.value + ' / 下 ' + bottomEl.value;
         }
     }
 
     function reset() {
-        leftEl.value = 420; topEl.value = 0; apply();
-        try { localStorage.removeItem('xk_crop_left'); localStorage.removeItem('xk_crop_top'); } catch (e) {}
+        leftEl.value = 420; topEl.value = 0; bottomEl.value = 0; apply();
+        try { localStorage.removeItem('xk_crop_left'); localStorage.removeItem('xk_crop_top'); localStorage.removeItem('xk_crop_bottom'); } catch (e) {}
         document.getElementById('hintbar').textContent = '已恢复默认（左 420 / 上 0）';
     }
 
@@ -99,8 +104,10 @@
 
     leftEl.value = num('xk_crop_left', 420);
     topEl.value = num('xk_crop_top', 0);
+    bottomEl.value = num('xk_crop_bottom', 0);
     leftEl.addEventListener('input', apply);
     topEl.addEventListener('input', apply);
+    bottomEl.addEventListener('input', apply);
     window.addEventListener('resize', sizeStage);
     sizeStage();
 </script>
