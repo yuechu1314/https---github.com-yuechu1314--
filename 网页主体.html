@@ -1200,12 +1200,17 @@
         p.scrollIntoView({behavior:'smooth',block:'start'});
     }
 
-    /* ==================== 小可智能体 · 扣子编程 Web SDK 嵌入 ==================== */
+    /* ==================== 小可智能体 ====================
+       改下面 XK_MODE 一个词就能切换接入方式：
+       'preview' —— 扣子预览页，不需要令牌，功能已验证；缺点是加载慢、左侧要裁掉
+       'sdk'     —— 扣子编程 Web SDK，快且界面干净；需要有效的访问令牌
+    ==================================================== */
+    const XK_MODE = 'preview';
+    const XK_PREVIEW_URL = 'https://code.coze.cn/p/7703769752451399722/preview?link_share=true';
+    const XK_PREVIEW_CROP = 420;     // preview 模式下左侧被裁掉的宽度
     const XK_SDK_ORIGIN = 'https://sdk.coze.site';
     const XK_PROJECT_ID = '7703769752451399722';
-    // ⚠️ 令牌写在前端，任何人查看源码都能拿到；演示结束后请去扣子后台重置
-    // 令牌不写死在仓库里：优先读本机保存的（在「小可SDK测试.html」里填一次就会存到这里）
-    // 要发布成公网可用，把下面的 YOUR_TOKEN 换成真实令牌，并注意这等于公开
+    // 令牌不写死在仓库里：优先读本机保存的（在「小可SDK测试.html」里填一次就会存在这）
     const XK_SDK_TOKEN = (function () {
         try { var saved = localStorage.getItem('xk_wsdk_token'); if (saved) return saved; } catch (e) {}
         return 'YOUR_TOKEN';
@@ -1218,7 +1223,9 @@
     function applyAgentCrop() {
         const dlg = document.querySelector('.xk-dialog');
         if (!dlg) return;
-        dlg.style.setProperty('--xk-crop', '0px');   // SDK 自带干净界面，不再裁切
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        const crop = (XK_MODE === 'preview' && !isMobile) ? XK_PREVIEW_CROP : 0;
+        dlg.style.setProperty('--xk-crop', crop + 'px');
     }
 
     /* 鼠标移到机器人上就先开始加载，点开时通常已经好了 */
@@ -1241,8 +1248,7 @@
         const hint = document.getElementById('xkHint');
         if (!frame || !loading) return;
 
-        // 没配置令牌：不发起请求，直接给出说明
-        if (!XK_SDK_TOKEN || XK_SDK_TOKEN === 'YOUR_TOKEN') {
+        if (XK_MODE === 'sdk' && (!XK_SDK_TOKEN || XK_SDK_TOKEN === 'YOUR_TOKEN')) {
             loading.classList.remove('hide');
             loading.innerHTML = '<div style="font-size:13px;line-height:2;text-align:center;">还没有配置访问令牌<br>' +
                 '<span style="font-size:12px;color:#8d95b3;">双击「小可SDK测试.html」填一次令牌，这里会自动用上</span></div>';
@@ -1254,23 +1260,33 @@
         hint.classList.remove('show');
         xkLoaded = false;
         xkLoadingStarted = true;
-
         clearTimeout(xkHintTimer);
         clearTimeout(xkHintHideTimer);
-        frame.src = XK_SDK_ORIGIN + '/';
 
-        // 兜底：迟迟没握手就先撤掉遮罩并给提示
+        if (XK_MODE === 'preview') {
+            frame.onload = function () {
+                if (!frame.src || frame.src.indexOf('about:blank') === 0) return;
+                hideAgentLoading();
+            };
+            frame.src = 'about:blank';
+            setTimeout(function () { frame.src = XK_PREVIEW_URL; }, 30);
+        } else {
+            frame.onload = null;
+            frame.src = XK_SDK_ORIGIN + '/';
+        }
+
+        // 兜底：迟迟没加载完就先撤掉遮罩并给提示
         xkHintTimer = setTimeout(function () {
             if (xkLoaded) return;
             loading.classList.add('hide');
             hint.classList.add('show');
             xkHintHideTimer = setTimeout(function () { hint.classList.remove('show'); }, 9000);
-        }, 8000);
+        }, 12000);
     }
 
-    /* 与 SDK iframe 握手：收到 IFRAME_READY 后发送 INIT */
+    /* Web SDK 模式：收到 IFRAME_READY 后发送 INIT */
     window.addEventListener('message', function (event) {
-        if (event.origin !== XK_SDK_ORIGIN) return;
+        if (XK_MODE !== 'sdk' || event.origin !== XK_SDK_ORIGIN) return;
         const data = event.data || {};
         const frame = document.getElementById('xkFrame');
         if (!frame || !frame.contentWindow) return;
@@ -1288,7 +1304,6 @@
                 payload: { token: XK_SDK_TOKEN }
             }, XK_SDK_ORIGIN);
         }
-        // 鉴权类报错：把提示亮出来
         if (String(data.type || '').toUpperCase().indexOf('INVALID') > -1 ||
             String(data.type || '').toUpperCase().indexOf('ERROR') > -1) {
             console.warn('[小可] SDK 返回异常：', data);
@@ -1296,7 +1311,6 @@
             if (hint) hint.classList.add('show');
         }
     });
-
     function openAgent() {
         try {
             const modal = document.getElementById('xkModal');
