@@ -304,42 +304,7 @@
             .hero-stats { width: 100%; justify-content: space-around; }
             .stats-row { grid-template-columns: 1fr; }
         }
-           /* === 小可智能体 === */
-        .xiao-ke-btn {
-            position: fixed; bottom: 28px; right: 28px; z-index: 9999;
-            width: 60px; height: 60px; border-radius: 50%;
-            background: linear-gradient(135deg, #4fc3f7, #2196F3);
-            box-shadow: 0 4px 18px rgba(33,150,243,0.35);
-            border: 2px solid rgba(255,255,255,0.3); cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px; color: #fff;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .xiao-ke-btn:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(33,150,243,0.5); }
-        .xiao-ke-btn .badge {
-            position: absolute; top: -2px; right: -2px;
-            width: 14px; height: 14px; border-radius: 50%;
-            background: #4caf50; border: 2px solid #fff;
-            animation: xk-pulse 2s infinite;
-        }
-        @keyframes xk-pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.15); }
-        }
-        .xiao-ke-btn .pulse-ring {
-            position: absolute; width: 100%; height: 100%; border-radius: 50%;
-            border: 2px solid rgba(79,195,247,0.5);
-            animation: xk-ring 2s ease-out infinite;
-        }
-        @keyframes xk-ring {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.6); opacity: 0; }
-        }
-
-                @media (max-width: 768px) {
-            .xiao-ke-btn { bottom: 16px; right: 16px; width: 52px; height: 52px; font-size: 24px; }
-        }
-         </style>
+    </style>
 </head>
 <body>
 
@@ -426,12 +391,6 @@
             </div>
         </div>
     </main>
-    <!-- ==================== 小可智能体 ==================== -->
-        <div class="xiao-ke-btn" onclick="window.open('https://www.coze.cn','_blank')" title="小可智能助手 — 点击对话">
-        <div class="pulse-ring"></div>
-        <div class="badge"></div>
-        🤖
-    </div>
 
     <script>
     const collegeData = {
@@ -1030,6 +989,5 @@
         p.scrollIntoView({behavior:'smooth',block:'start'});
     }
     </script>
-    
 </body>
 </html>
