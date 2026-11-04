@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小可智能助手 · 福建卫职院百事通</title>
+<style>
+    html, body {
+        margin: 0; padding: 0;
+        width: 100%; height: 100%;
+        overflow: hidden;
+        background: #eef1f5;
+    }
+    /* 扣子页面整体向左偏移，把左侧「聊天记录」那一列推出可视区域，再用 overflow 裁掉 */
+    .xk-stage {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        overflow: hidden;
+        background: #fff;
+    }
+    .xk-stage iframe {
+        position: absolute; top: 0;
+        left: -264px;                       /* 裁掉的左侧宽度，可微调 */
+        width: calc(100% + 264px);
+        height: 100%;
+        border: 0;
+        background: #fff;
+        display: block;
+    }
+    /* 窄屏时扣子页面本身就是单列布局，不再裁切 */
+    @media (max-width: 768px) {
+        .xk-stage iframe { left: 0; width: 100%; }
+    }
+</style>
+</head>
+<body>
+    <div class="xk-stage">
+        <iframe src="https://code.coze.cn/p/7703769752451399722/preview?link_share=true"
+                title="小可智能助手"
+                allow="microphone; camera; clipboard-read; clipboard-write"></iframe>
+    </div>
+</body>
+</html>

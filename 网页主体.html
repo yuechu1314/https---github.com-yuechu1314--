@@ -312,7 +312,7 @@
             box-shadow: 0 4px 18px rgba(33,150,243,0.35);
             border: 2px solid rgba(255,255,255,0.3); cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            font-size: 28px; color: #fff;
+            font-size: 28px; color: #fff; text-decoration: none;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .xiao-ke-btn:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(33,150,243,0.5); }
@@ -338,6 +338,78 @@
 
                 @media (max-width: 768px) {
             .xiao-ke-btn { bottom: 16px; right: 16px; width: 52px; height: 52px; font-size: 24px; }
+        }
+
+        /* === 小可智能体 · 内嵌对话窗口（默认裁掉扣子页面左侧的聊天记录） === */
+        .xk-modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%; z-index: 10000;
+            display: none; align-items: center; justify-content: center;
+            padding: 14px;
+        }
+        .xk-modal.show { display: flex; }
+        .xk-backdrop {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(7,16,29,0.6);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        }
+        .xk-dialog {
+            position: relative; display: flex; flex-direction: column;
+            width: 1240px; max-width: 94vw; height: 820px; max-height: 88vh;
+            background: #fff; border-radius: 18px; overflow: hidden;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+            --xk-crop: 264px;              /* 左侧聊天记录被裁掉的宽度，可按实际页面微调 */
+        }
+        .xk-head {
+            height: 52px; min-height: 52px; padding: 0 10px 0 18px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: linear-gradient(90deg, #0d2137 0%, #1a5276 60%, #1e6b9e 100%);
+            color: #fff; user-select: none;
+        }
+        .xk-head-title { display: flex; align-items: center; font-size: 15px; font-weight: bold; letter-spacing: 0.5px; }
+        .xk-head-title .dot { width: 9px; height: 9px; margin-right: 9px; border-radius: 50%; background: #4caf50; box-shadow: 0 0 0 3px rgba(76,175,80,0.25); }
+        .xk-head-title small { margin-left: 8px; font-weight: normal; font-size: 12px; color: rgba(255,255,255,0.6); letter-spacing: 0; }
+        .xk-head-actions { display: flex; align-items: center; }
+        .xk-btn {
+            width: 34px; height: 34px; margin-left: 4px; border: 0; border-radius: 9px; cursor: pointer;
+            background: rgba(255,255,255,0.1); color: #fff; font-size: 15px; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s ease;
+        }
+        .xk-btn:hover { background: rgba(255,255,255,0.22); }
+        .xk-btn.on { background: rgba(79,195,247,0.35); }
+        .xk-stage { position: relative; flex: 1 1 auto; background: #0b1420; overflow: hidden; }
+        .xk-stage iframe {
+            position: absolute; top: 0; height: 100%; border: 0; background: #fff; display: block;
+            left: calc(0px - var(--xk-crop));
+            width: calc(100% + var(--xk-crop));
+        }
+        .xk-loading {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 2;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: #f5f8fb; color: #5b7083; font-size: 14px;
+            transition: opacity 0.35s ease, visibility 0.35s ease;
+        }
+        .xk-loading.hide { opacity: 0; visibility: hidden; }
+        .xk-spinner { width: 34px; height: 34px; margin-bottom: 14px; border-radius: 50%; border: 3px solid rgba(33,150,243,0.18); border-top-color: #2196F3; animation: xk-spin 0.9s linear infinite; }
+        @keyframes xk-spin { to { transform: rotate(360deg); } }
+        .xk-hint {
+            position: absolute; left: 50%; margin-left: -170px; bottom: 18px; z-index: 3;
+            width: 340px;
+            display: none; align-items: center; justify-content: center;
+            background: rgba(13,33,55,0.94); color: #e6f2ff; font-size: 13px;
+            padding: 10px 14px; border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .xk-hint.show { display: flex; }
+        .xk-hint button { margin-left: 10px; border: 0; background: #2196F3; color: #fff; font-size: 12px; padding: 6px 10px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
+        .xk-hint button:hover { background: #1e88e5; }
+        @media (max-width: 768px) {
+            .xk-modal { padding: 0; }
+            .xk-dialog { width: 100%; height: 100%; max-width: 100%; max-height: 100%; border-radius: 0; }
+            .xk-head { padding-left: 12px; }
+            .xk-head-title small { display: none; }
+            .xk-hint { left: 12px; right: 12px; width: auto; margin-left: 0; }
         }
          </style>
 </head>
@@ -427,10 +499,32 @@
         </div>
     </main>
     <!-- ==================== 小可智能体 ==================== -->
-        <div class="xiao-ke-btn" onclick="window.open('https://code.coze.cn/p/7703769752451399722/preview?link_share=true','_blank')" title="小可智能助手 — 点击对话">
+    <!-- 注意：这里用 <a href> 做兜底，即使脚本没生效也能点开「小可对话.html」 -->
+        <a class="xiao-ke-btn" href="小可对话.html" target="_blank" onclick="openAgent(); return false;" title="小可智能助手 — 点击对话">
         <div class="pulse-ring"></div>
         <div class="badge"></div>
         🤖
+    </a>
+
+    <!-- 小可智能体 · 内嵌对话窗口：默认把扣子页面左侧的聊天记录裁掉不显示 -->
+    <div class="xk-modal" id="xkModal" aria-hidden="true">
+        <div class="xk-backdrop" onclick="closeAgent()"></div>
+        <div class="xk-dialog">
+            <div class="xk-head">
+                <div class="xk-head-title"><span class="dot"></span>小可智能助手<small>福建卫职院百事通</small></div>
+                <div class="xk-head-actions">
+                    <button class="xk-btn on" id="xkHistoryBtn" onclick="toggleHistory()" title="显示 / 隐藏左侧聊天记录">☰</button>
+                    <button class="xk-btn" onclick="reloadAgent()" title="重新加载">⟳</button>
+                    <button class="xk-btn" onclick="openAgentWindow()" title="在新窗口打开">↗</button>
+                    <button class="xk-btn" onclick="closeAgent()" title="关闭">✕</button>
+                </div>
+            </div>
+            <div class="xk-stage">
+                <iframe id="xkFrame" title="小可智能助手" src="about:blank" allow="microphone; camera; clipboard-read; clipboard-write"></iframe>
+                <div class="xk-loading" id="xkLoading"><div class="xk-spinner"></div><div>正在加载小可智能助手…</div></div>
+                <div class="xk-hint" id="xkHint">加载较慢或页面空白？<button onclick="openAgentWindow()">在新窗口打开</button></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1029,6 +1123,109 @@
         p.classList.add('show');
         p.scrollIntoView({behavior:'smooth',block:'start'});
     }
+
+    /* ==================== 小可智能体 · 内嵌窗口控制 ==================== */
+    const XK_AGENT_URL = 'https://code.coze.cn/p/7703769752451399722/preview?link_share=true';
+    const XK_CROP_DEFAULT = 264;     // 需要裁掉的「左侧聊天记录」宽度（px），如仍露出可调大，误裁对话可调小
+    let xkLoaded = false;
+    let xkHideHistory = true;        // 默认隐藏聊天记录
+    let xkHintTimer = null;
+    let xkHintHideTimer = null;
+
+    function applyAgentCrop() {
+        const dlg = document.querySelector('.xk-dialog');
+        if (!dlg) return;
+        // 手机端扣子页面本身就是窄屏布局，不再额外裁切
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        dlg.style.setProperty('--xk-crop', (xkHideHistory && !isMobile ? XK_CROP_DEFAULT : 0) + 'px');
+        const btn = document.getElementById('xkHistoryBtn');
+        if (btn) {
+            btn.classList.toggle('on', xkHideHistory);
+            btn.title = xkHideHistory ? '当前已隐藏聊天记录，点击可显示' : '当前显示聊天记录，点击可隐藏';
+        }
+    }
+
+    function loadAgentFrame() {
+        const frame = document.getElementById('xkFrame');
+        const loading = document.getElementById('xkLoading');
+        const hint = document.getElementById('xkHint');
+        if (!frame || !loading) return;
+
+        loading.classList.remove('hide');
+        hint.classList.remove('show');
+        xkLoaded = false;
+
+        frame.onload = function () {
+            if (!frame.src || frame.src.indexOf('about:blank') === 0) return;
+            xkLoaded = true;
+            loading.classList.add('hide');
+            clearTimeout(xkHintTimer);
+        };
+
+        clearTimeout(xkHintTimer);
+        clearTimeout(xkHintHideTimer);
+        frame.src = 'about:blank';
+        setTimeout(function () { frame.src = XK_AGENT_URL; }, 30);
+
+        xkHintTimer = setTimeout(function () {
+            if (xkLoaded) return;
+            hint.classList.add('show');
+            xkHintHideTimer = setTimeout(function () { hint.classList.remove('show'); }, 9000);
+        }, 6000);
+    }
+
+    function openAgent() {
+        try {
+            const modal = document.getElementById('xkModal');
+            if (!modal) { goAgentPage(); return; }
+            document.body.style.overflow = 'hidden';
+            modal.classList.add('show');
+            modal.style.display = 'flex';          // 双保险：万一样式没生效也能弹出来
+            modal.setAttribute('aria-hidden', 'false');
+            applyAgentCrop();
+            if (!xkLoaded) loadAgentFrame();
+            // 自检：浮层没正常铺开（老浏览器不认某些样式）就直接跳到独立对话页
+            setTimeout(function () {
+                const r = modal.getBoundingClientRect();
+                if (r.width < 200 || r.height < 200) { closeAgent(); goAgentPage(); }
+            }, 150);
+        } catch (err) {
+            console.error('[小可] 打开浮层失败：', err);
+            goAgentPage();
+        }
+    }
+
+    function goAgentPage() { window.location.href = '小可对话.html'; }
+
+    function closeAgent() {
+        const modal = document.getElementById('xkModal');
+        if (!modal) return;
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        clearTimeout(xkHintTimer);
+        const hint = document.getElementById('xkHint');
+        if (hint) hint.classList.remove('show');
+    }
+
+    function reloadAgent() { loadAgentFrame(); }
+
+    function toggleHistory() {
+        xkHideHistory = !xkHideHistory;
+        applyAgentCrop();
+    }
+
+    function openAgentWindow() { window.open('小可对话.html', '_blank'); }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAgent();
+    });
+
+    window.addEventListener('resize', function () {
+        const modal = document.getElementById('xkModal');
+        if (modal && modal.classList.contains('show')) applyAgentCrop();
+    });
     </script>
     
 </body>
