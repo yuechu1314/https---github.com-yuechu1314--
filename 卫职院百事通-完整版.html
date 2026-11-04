@@ -224,6 +224,15 @@ html[data-theme="dark"] .tt-today-cell{background:rgba(255,255,255,.05)}
 .study-group-meta{font-size:12px;color:var(--muted);white-space:nowrap}
 .study-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
 .study-item.hl{background:var(--accent-soft);border-radius:6px}
+.pomo-card{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:18px}
+.pomo-time{font-size:34px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1;letter-spacing:.02em}
+.pomo-time.run{color:var(--accent)}
+.pomo-label{font-size:12px;color:var(--muted);margin-top:6px}
+.pomo-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pomo-input{display:flex;align-items:center;gap:6px}
+.pomo-input label{font-size:12px;color:var(--muted);white-space:nowrap}
+.pomo-input input{width:64px;height:34px;border:1px solid var(--line);border-radius:8px;padding:0 6px;font-size:13px;font-family:inherit;color:var(--ink);background:var(--surface);outline:0;text-align:center}
+.pomo-input input:focus{border-color:var(--accent-2)}
 .study-item-date{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;padding-top:2px}
 .study-item-main{flex:1;min-width:0}
 .study-item-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
@@ -603,6 +612,18 @@ html[data-theme="dark"] .hl-mark{color:#1a1f1c}
 
     <div class="content-panel" id="studyPanel">
       <div class="panel-header"><span class="panel-icon"><svg class="ico"><use href="#i-log"/></svg></span><h3>学习日志</h3><span class="panel-badge" id="studyCount">0 条</span></div>
+      <div class="pomo-card">
+        <div class="pomo-time-wrap">
+          <div class="pomo-time" id="pomoTime">25:00</div>
+          <div class="pomo-label" id="pomoLabel">专注 · 25 分钟</div>
+        </div>
+        <div class="pomo-actions">
+          <div class="pomo-input"><label>专注</label><input type="number" id="pomoFocusMin" value="25" min="1" max="180" onchange="pomoApplyDurations()"></div>
+          <div class="pomo-input"><label>休息</label><input type="number" id="pomoBreakMin" value="5" min="1" max="60" onchange="pomoApplyDurations()"></div>
+          <button type="button" class="btn-dark" id="pomoStart" onclick="pomoToggle()">开始</button>
+          <button type="button" class="ghost-btn" onclick="pomoReset()">重置</button>
+        </div>
+      </div>
       <div class="analysis-grid">
         <form class="deduct-form" onsubmit="addStudy(event)" autocomplete="off">
           <div class="form-row">
@@ -1264,6 +1285,64 @@ function renderTimetable(){
   }
 }
 
+/* ================= 番茄钟 ================= */
+let pomoMode='focus', pomoTotal=25*60, pomoLeft=25*60, pomoRunning=false, pomoInterval=null;
+function pomoFmt(s){ const m=Math.floor(s/60), sec=s%60; return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0'); }
+function pomoNum(id, def){ const el=document.getElementById(id); const v=el?parseInt(el.value,10):NaN; return (isFinite(v)&&v>0)?v:def; }
+function pomoFocusMinVal(){ return Math.min(180, pomoNum('pomoFocusMin',25)); }
+function pomoBreakMinVal(){ return Math.min(60, pomoNum('pomoBreakMin',5)); }
+function pomoDuration(mode){ return (mode==='break'?pomoBreakMinVal():pomoFocusMinVal())*60; }
+function pomoRender(){
+  const t=document.getElementById('pomoTime'); if(t){ t.textContent=pomoFmt(pomoLeft); if(pomoRunning) t.classList.add('run'); else t.classList.remove('run'); }
+  const l=document.getElementById('pomoLabel'); if(l){ l.textContent=(pomoMode==='break'?'休息 · ':'专注 · ')+Math.round(pomoTotal/60)+' 分钟'; }
+  const b=document.getElementById('pomoStart'); if(b){ b.textContent=pomoRunning?'暂停':'开始'; }
+}
+function pomoApplyDurations(){ if(pomoRunning) return; pomoTotal=pomoDuration(pomoMode); pomoLeft=pomoTotal; pomoRender(); }
+function pomoToggle(){
+  if(pomoRunning){ pomoPause(); return; }
+  if(pomoLeft<=0) pomoLeft=pomoTotal||pomoDuration(pomoMode);
+  pomoRunning=true; pomoRender();
+  pomoInterval=setInterval(()=>{
+    pomoLeft--;
+    if(pomoLeft<=0){ pomoFinish(); return; }
+    pomoRender();
+  },1000);
+}
+function pomoPause(){ pomoRunning=false; if(pomoInterval){ clearInterval(pomoInterval); pomoInterval=null; } pomoRender(); }
+function pomoReset(){ pomoPause(); pomoTotal=pomoDuration(pomoMode); pomoLeft=pomoTotal; pomoRender(); }
+function pomoFinish(){
+  if(pomoInterval){ clearInterval(pomoInterval); pomoInterval=null; }
+  pomoRunning=false;
+  const wasFocus=pomoMode==='focus';
+  const doneMin=Math.round(pomoTotal/60);
+  try{ pomoBeep(); }catch(e){}
+  if(wasFocus){
+    const cEl=document.getElementById('sCourse');
+    const course=((cEl&&cEl.value)||'').trim()||'专注学习';
+    const dEl=document.getElementById('sDate');
+    const date=(dEl&&dEl.value)||todayStr();
+    const arr=getStudy();
+    arr.unshift({ id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), course:course, status:'学习中', minutes:doneMin, note:'番茄钟专注自动记录', date:date });
+    setStudy(arr);
+    renderStudy(); renderProfile();
+    pomoMode='break';
+    pomoTotal=pomoDuration('break'); pomoLeft=pomoTotal; pomoRender();
+    alert('专注完成！已自动记录 '+doneMin+' 分钟。接下来休息 '+pomoBreakMinVal()+' 分钟。');
+  } else {
+    pomoMode='focus';
+    pomoTotal=pomoDuration('focus'); pomoLeft=pomoTotal; pomoRender();
+    alert('休息结束，准备下一轮专注。');
+  }
+}
+function pomoBeep(){
+  const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+  const ctx=new AC(), o=ctx.createOscillator(), g=ctx.createGain();
+  o.type='sine'; o.frequency.value=880; o.connect(g); g.connect(ctx.destination);
+  const t0=ctx.currentTime;
+  g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.25,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+0.7);
+  o.start(t0); o.stop(t0+0.75);
+}
+
 /* ================= 顶部搜索：输入关键词跳转页面 ================= */
 const searchIndex = [];
 Object.keys(collegeData).forEach(c=>{
@@ -1382,7 +1461,7 @@ document.addEventListener('DOMContentLoaded', function(){
   const d=document.getElementById('dDate'); if(d) d.value=today;
   const sd=document.getElementById('sDate'); if(sd) sd.value=today;
   const bd=document.getElementById('bDate'); if(bd) bd.value=today;
-  renderAnalysis(); renderBonus(); renderStudy(); renderProfile(); renderTimetable();
+  renderAnalysis(); renderBonus(); renderStudy(); renderProfile(); renderTimetable(); pomoRender();
   const cd=document.getElementById('cDay'); if(cd) cd.value=todayDayNum();
 });
 </script>
