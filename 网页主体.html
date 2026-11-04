@@ -382,6 +382,7 @@
             box-shadow: 0 26px 70px rgba(29,42,74,0.30);
             animation: xk-slide 0.26s ease;
             --xk-crop: 0px;
+            --xk-crop-top: 0px;
         }
         @keyframes xk-slide { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
         .xk-head {
@@ -404,9 +405,11 @@
         .xk-btn.on { background: rgba(254,215,224,0.35); }
         .xk-stage { position: relative; flex: 1 1 auto; background: #eef1f9; overflow: hidden; }
         .xk-stage iframe {
-            position: absolute; top: 0; height: 100%; border: 0; background: #fff; display: block;
+            position: absolute; border: 0; background: #fff; display: block;
             left: calc(0px - var(--xk-crop));
+            top: calc(0px - var(--xk-crop-top));
             width: calc(100% + var(--xk-crop));
+            height: calc(100% + var(--xk-crop-top));
         }
         .xk-loading {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 2;
@@ -1224,8 +1227,22 @@
         const dlg = document.querySelector('.xk-dialog');
         if (!dlg) return;
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
-        const crop = (XK_MODE === 'preview' && !isMobile) ? XK_PREVIEW_CROP : 0;
-        dlg.style.setProperty('--xk-crop', crop + 'px');
+        if (XK_MODE !== 'preview' || isMobile) {
+            dlg.style.setProperty('--xk-crop', '0px');
+            dlg.style.setProperty('--xk-crop-top', '0px');
+            return;
+        }
+        // 默认值可被「小可裁剪标定.html」里保存的数值覆盖
+        let left = XK_PREVIEW_CROP;
+        let top = 0;
+        try {
+            const l = parseInt(localStorage.getItem('xk_crop_left'), 10);
+            const t = parseInt(localStorage.getItem('xk_crop_top'), 10);
+            if (!isNaN(l) && l >= 0) left = l;
+            if (!isNaN(t) && t >= 0) top = t;
+        } catch (e) {}
+        dlg.style.setProperty('--xk-crop', left + 'px');
+        dlg.style.setProperty('--xk-crop-top', top + 'px');
     }
 
     /* 鼠标移到机器人上就先开始加载，点开时通常已经好了 */
