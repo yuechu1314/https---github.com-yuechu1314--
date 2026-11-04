@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>福建卫职院百事通</title>
+    <!-- 提前和扣子域名建连，省掉打开小窗时的 DNS + TLS 时间 -->
+    <link rel="preconnect" href="https://code.coze.cn" crossorigin>
+    <link rel="dns-prefetch" href="//code.coze.cn">
+    <link rel="dns-prefetch" href="//lf-coze-web-cdn.coze.cn">
+    <link rel="preconnect" href="https://lf-coze-web-cdn.coze.cn" crossorigin>
     <style>
         /* ===== 配色（取自参考图）：#334b83 深蓝 / #b1bfe0 浅蓝紫 / #fed7e0 浅粉 / #ea6181 玫红 ===== */
         :root {
@@ -572,7 +577,7 @@
     </main>
     <!-- ==================== 小可智能体 ==================== -->
     <!-- 注意：这里用 <a href> 做兜底，即使脚本没生效也能点开「小可对话.html」 -->
-        <a class="xiao-ke-btn" href="小可对话.html" target="_blank" onclick="openAgent(); return false;" title="小可智能助手 — 点击对话">
+        <a class="xiao-ke-btn" href="小可对话.html" target="_blank" onclick="openAgent(); return false;" onmouseenter="preloadAgent()" onfocus="preloadAgent()" ontouchstart="preloadAgent()" title="小可智能助手 — 点击对话">
         <div class="pulse-ring"></div>
         <div class="badge"></div>
         <svg class="ico"><use href="#i-robot"/></svg>
@@ -592,7 +597,7 @@
             </div>
             <div class="xk-stage">
                 <iframe id="xkFrame" title="小可智能助手" src="about:blank" allow="microphone; camera; clipboard-read; clipboard-write"></iframe>
-                <div class="xk-loading" id="xkLoading"><div class="xk-spinner"></div><div>正在加载小可智能助手…</div></div>
+                <div class="xk-loading" id="xkLoading"><div class="xk-spinner"></div><div>正在加载小可智能助手…<br><span style="font-size:12px;color:#8d95b3;">首次打开需要 10–30 秒，之后就快了</span></div></div>
                 <div class="xk-hint" id="xkHint">加载较慢或页面空白？<button onclick="openAgentWindow()">在新窗口打开</button></div>
             </div>
         </div>
@@ -1199,6 +1204,7 @@
     const XK_AGENT_URL = 'https://code.coze.cn/p/7703769752451399722/preview?link_share=true';
     const XK_CROP_FIXED = 420;       // 左侧固定裁掉 420px，写死不提供调整
     let xkLoaded = false;
+    let xkLoadingStarted = false;
     let xkHintTimer = null;
     let xkHintHideTimer = null;
 
@@ -1210,6 +1216,12 @@
         dlg.style.setProperty('--xk-crop', (isMobile ? 0 : XK_CROP_FIXED) + 'px');
     }
 
+    /* 鼠标移到机器人上就先开始加载，点开时通常已经好了 */
+    function preloadAgent() {
+        if (xkLoaded || xkLoadingStarted) return;
+        loadAgentFrame();
+    }
+
     function loadAgentFrame() {
         const frame = document.getElementById('xkFrame');
         const loading = document.getElementById('xkLoading');
@@ -1219,10 +1231,12 @@
         loading.classList.remove('hide');
         hint.classList.remove('show');
         xkLoaded = false;
+        xkLoadingStarted = true;
 
         frame.onload = function () {
             if (!frame.src || frame.src.indexOf('about:blank') === 0) return;
             xkLoaded = true;
+            xkLoadingStarted = false;
             loading.classList.add('hide');
             clearTimeout(xkHintTimer);
         };
@@ -1248,7 +1262,7 @@
             modal.style.display = 'block';         // 双保险：万一样式没生效也能弹出来
             modal.setAttribute('aria-hidden', 'false');
             applyAgentCrop();
-            if (!xkLoaded) loadAgentFrame();
+            if (!xkLoaded && !xkLoadingStarted) loadAgentFrame();
             // 自检：浮层没正常铺开（老浏览器不认某些样式）就直接跳到独立对话页
             setTimeout(function () {
                 const r = modal.getBoundingClientRect();
@@ -1273,7 +1287,7 @@
         if (hint) hint.classList.remove('show');
     }
 
-    function reloadAgent() { loadAgentFrame(); }
+    function reloadAgent() { xkLoadingStarted = false; loadAgentFrame(); }
 
     function openAgentWindow() { window.open('小可对话.html', '_blank'); }
 
