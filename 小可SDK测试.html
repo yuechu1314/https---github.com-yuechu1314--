@@ -3,116 +3,151 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小可 · Web SDK 接入测试</title>
+<title>小可 · 连接测试（带日志）</title>
 <style>
-    :root {
-        --blue-deep: #334b83; --blue-mid: #4a63a3; --blue-soft: #b1bfe0;
-        --pink: #ea6181; --ink: #24304f; --ink-soft: #475471;
-    }
+    :root { --blue-deep:#334b83; --blue-mid:#4a63a3; --blue-soft:#b1bfe0; --pink:#ea6181; --ink:#24304f; --ink-soft:#475471; }
     * { box-sizing: border-box; }
-    body {
-        margin: 0; height: 100vh; display: flex; flex-direction: column;
-        font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif; color: var(--ink);
-        background: #f5f7fd;
-    }
-    .bar {
-        padding: 14px 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
-        background: #fff; box-shadow: 0 2px 16px rgba(51,75,131,0.08); z-index: 2;
-    }
-    .bar h1 { font-size: 15px; margin: 0 12px 0 0; color: var(--blue-deep); }
-    input {
-        padding: 9px 12px; font-size: 13px; border: 1px solid #dfe4f2; border-radius: 10px;
-        outline: none; background: #fafbff; min-width: 320px;
-    }
+    body { margin: 0; height: 100vh; display: flex; flex-direction: column;
+           font-family: "Microsoft YaHei","微软雅黑",Arial,sans-serif; color: var(--ink); background: #f5f7fd; }
+    .bar { padding: 12px 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+           background: #fff; box-shadow: 0 2px 14px rgba(51,75,131,0.08); z-index: 2; }
+    .bar h1 { font-size: 14px; margin: 0 8px 0 0; color: var(--blue-deep); white-space: nowrap; }
+    input { padding: 9px 12px; font-size: 13px; border: 1px solid #dfe4f2; border-radius: 10px;
+            outline: none; background: #fafbff; width: 420px; max-width: 52vw; }
     input:focus { border-color: var(--blue-soft); box-shadow: 0 0 0 3px rgba(177,191,224,0.25); }
-    button {
-        border: 0; cursor: pointer; font-size: 13px; font-weight: bold; padding: 9px 18px;
-        border-radius: 999px; font-family: inherit; color: #fff;
-        background: linear-gradient(135deg, var(--blue-mid), var(--blue-deep));
-        box-shadow: 0 6px 16px rgba(51,75,131,0.25);
-    }
+    button { border: 0; cursor: pointer; font-size: 13px; font-weight: bold; padding: 9px 18px; border-radius: 999px;
+             font-family: inherit; color: #fff; background: linear-gradient(135deg, var(--blue-mid), var(--blue-deep));
+             box-shadow: 0 6px 16px rgba(51,75,131,0.25); }
     button.ghost { background: #f2f5fc; color: var(--blue-deep); box-shadow: none; }
-    .status { font-size: 12px; color: var(--pink); font-weight: bold; margin-left: auto; }
-    .stage { flex: 1; position: relative; overflow: hidden; }
-    #sdk { width: 100%; height: 100%; border: 0; }
-    .tip {
-        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-        text-align: center; color: var(--ink-soft); font-size: 13px; line-height: 2; padding: 30px;
-    }
+    .main { flex: 1; display: flex; min-height: 0; }
+    .pane { flex: 1; min-width: 0; position: relative; background: #fff; }
+    #frame { width: 100%; height: 100%; border: 0; display: block; }
+    .logbox { width: 380px; min-width: 300px; border-left: 1px solid #e6eaf6; background: #fbfcff;
+              display: flex; flex-direction: column; }
+    .logbox h2 { font-size: 12px; color: var(--ink-soft); margin: 0; padding: 10px 14px; border-bottom: 1px solid #eef1f9; }
+    #log { flex: 1; overflow: auto; margin: 0; padding: 10px 14px; font: 12px/1.7 Consolas, Menlo, monospace;
+           color: #38405c; white-space: pre-wrap; word-break: break-all; }
+    #log .ok { color: #2e7d4f; }
+    #log .err { color: #d33b5c; font-weight: bold; }
+    #log .warn { color: #b06a00; }
+    .hint { padding: 10px 14px; font-size: 12px; color: var(--ink-soft); border-top: 1px solid #eef1f9; line-height: 1.8; }
 </style>
 </head>
 <body>
 <div class="bar">
-    <h1>小可 · Web SDK 测试</h1>
-    <input id="token" type="password" placeholder="粘贴访问令牌（czs_ 或 pat_ 开头，只存本机）">
-    <button id="start">启动</button>
-    <button class="ghost" id="clear">清空</button>
-    <span class="status" id="status"></span>
+    <h1>小可 · 连接测试</h1>
+    <input id="token" placeholder="粘贴令牌（czs_ / pat_ / eyJ 开头都可以）">
+    <button onclick="startTest()">启动</button>
+    <button class="ghost" onclick="clearToken()">清空令牌</button>
 </div>
-<div class="stage">
-    <div id="sdk"></div>
-    <div class="tip" id="tip">
-        projectId 已经填好（7703769752451399722）<br>
-        把令牌填到上面，点「启动」，这里就会出现真正的聊天界面
+
+<div class="main">
+    <div class="pane">
+        <iframe id="frame" src="about:blank" title="小可"></iframe>
+    </div>
+    <div class="logbox">
+        <h2>运行日志（截图这个区域给我）</h2>
+        <pre id="log"></pre>
+        <div class="hint" id="hint">点「启动」后，这里会一行行记录发生了什么。</div>
     </div>
 </div>
 
-<script src="https://lf-cdn.coze.cn/obj/unpkg/latest/coze/web-sdk/dist/js-umd/index.min.js"></script>
 <script>
+    var ORIGIN = 'https://sdk.coze.site';
     var PROJECT_ID = '7703769752451399722';
+
+    var frame = document.getElementById('frame');
+    var logEl = document.getElementById('log');
     var tokenInput = document.getElementById('token');
-    var statusEl = document.getElementById('status');
-    var tip = document.getElementById('tip');
-    var started = false;
 
-    try { tokenInput.value = localStorage.getItem('xk_wsdk_token') || ''; } catch (e) {}
-
-    function say(msg) { statusEl.textContent = msg || ''; }
-
-    function mask(t) {
-        if (!t) return '';
-        if (t.length <= 14) return t;
-        return t.slice(0, 8) + '…' + t.slice(-4) + '（共 ' + t.length + ' 位）';
+    function log(msg, cls) {
+        var line = document.createElement('div');
+        if (cls) line.className = cls;
+        line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg;
+        logEl.appendChild(line);
+        logEl.scrollTop = logEl.scrollHeight;
     }
 
-    function showSaved() {
-        var t = '';
-        try { t = localStorage.getItem('xk_wsdk_token') || ''; } catch (e) {}
-        if (t) {
-            tip.innerHTML = '已保存令牌：' + mask(t) + '<br>点上面「启动」开始连接';
-            say('本机已存令牌');
+    function getToken() {
+        var t = tokenInput.value.trim();
+        if (!t) {
+            try { t = localStorage.getItem('xk_wsdk_token') || ''; } catch (e) {}
         }
+        return t;
     }
 
-    showSaved();
+    function startTest() {
+        var token = getToken();
+        log('点击了「启动」', 'warn');
 
-    function start() {
-        var token = tokenInput.value.trim();
-        if (!token) { say('先把令牌填上'); return; }
-        if (typeof cozeWebSDK === 'undefined') { say('SDK 脚本没加载成功，检查网络'); return; }
+        if (!token) {
+            log('没有令牌：输入框是空的，本地也没存过', 'err');
+            document.getElementById('hint').textContent = '先把令牌粘到输入框再点启动。';
+            return;
+        }
+
         try { localStorage.setItem('xk_wsdk_token', token); } catch (e) {}
-        if (started && cozeWebSDK.destroy) { try { cozeWebSDK.destroy(); } catch (e) {} }
+        log('令牌已保存到本机，长度 ' + token.length + ' 位，前 8 位：' + token.slice(0, 8));
 
-        say('初始化中…');
-        cozeWebSDK.init({
-            projectId: PROJECT_ID,
-            container: document.getElementById('sdk'),
-            style: 'width:100%;height:100%;border:0;',
-            theme: 'light',
-            refreshToken: function () { return Promise.resolve(token); },
-            onIframeReady: function () { tip.style.display = 'none'; say('已就绪'); },
-            onTokenInvalid: function () { say('令牌无效或权限不足'); },
-            onTokenExpired: function () { say('令牌已过期'); },
-            onNetworkError: function () { say('网络异常'); }
-        });
-        started = true;
+        log('正在加载 ' + ORIGIN + ' …');
+        frame.src = ORIGIN + '/?t=' + Date.now();
     }
 
-    document.getElementById('start').addEventListener('click', start);
-    document.getElementById('clear').addEventListener('click', function () {
+    function clearToken() {
         try { localStorage.removeItem('xk_wsdk_token'); } catch (e) {}
-        tokenInput.value = ''; say('已清空本地令牌');
+        tokenInput.value = '';
+        log('已清空本机令牌', 'warn');
+    }
+
+    window.addEventListener('message', function (event) {
+        if (event.origin !== ORIGIN) {
+            log('忽略来自 ' + event.origin + ' 的消息', 'warn');
+            return;
+        }
+        var data = event.data || {};
+        log('收到消息: ' + (data.type || '(无 type)'), 'ok');
+
+        if (data.type === 'IFRAME_READY') {
+            var token = getToken();
+            log('页面已就绪，发送 INIT（带 projectId 和令牌）');
+            frame.contentWindow.postMessage({
+                type: 'INIT',
+                payload: { token: token, projectId: PROJECT_ID }
+            }, ORIGIN);
+            document.getElementById('hint').textContent = '已发送初始化请求，等它返回结果…';
+        }
+
+        if (data.type === 'TOKEN_EXPIRED') {
+            log('令牌过期，重新推送', 'warn');
+            frame.contentWindow.postMessage({
+                type: 'UPDATE_TOKEN',
+                payload: { token: getToken() }
+            }, ORIGIN);
+        }
+
+        var t = String(data.type || '').toUpperCase();
+        if (t.indexOf('INVALID') > -1 || t.indexOf('ERROR') > -1 || t.indexOf('DENIED') > -1) {
+            log('对方返回异常：' + JSON.stringify(data).slice(0, 300), 'err');
+            document.getElementById('hint').textContent = '令牌或权限有问题，把左边日志截图给我。';
+        }
     });
+
+    window.addEventListener('error', function (e) {
+        log('页面脚本错误：' + (e.message || e), 'err');
+    });
+
+    (function init() {
+        var saved = '';
+        try { saved = localStorage.getItem('xk_wsdk_token') || ''; } catch (e) {}
+        if (saved) {
+            tokenInput.value = saved;
+            log('本机已存令牌，长度 ' + saved.length + ' 位，前 8 位：' + saved.slice(0, 8), 'ok');
+        } else {
+            log('本机还没有令牌');
+        }
+        log('环境：' + navigator.userAgent.slice(0, 60) + '…');
+        log('等待你点「启动」');
+    })();
 </script>
 </body>
 </html>
