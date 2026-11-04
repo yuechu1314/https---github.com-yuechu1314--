@@ -69,6 +69,23 @@
 
     function say(msg) { statusEl.textContent = msg || ''; }
 
+    function mask(t) {
+        if (!t) return '';
+        if (t.length <= 14) return t;
+        return t.slice(0, 8) + '…' + t.slice(-4) + '（共 ' + t.length + ' 位）';
+    }
+
+    function showSaved() {
+        var t = '';
+        try { t = localStorage.getItem('xk_wsdk_token') || ''; } catch (e) {}
+        if (t) {
+            tip.innerHTML = '已保存令牌：' + mask(t) + '<br>点上面「启动」开始连接';
+            say('本机已存令牌');
+        }
+    }
+
+    showSaved();
+
     function start() {
         var token = tokenInput.value.trim();
         if (!token) { say('先把令牌填上'); return; }
