@@ -105,7 +105,9 @@
             return;
         }
         var data = event.data || {};
-        log('收到消息: ' + (data.type || '(无 type)'), 'ok');
+        var dump = '';
+        try { dump = JSON.stringify(data); } catch (e) { dump = String(data); }
+        log('收到消息: ' + (data.type || '(无 type)') + '  内容: ' + dump.slice(0, 400), 'ok');
 
         if (data.type === 'IFRAME_READY') {
             var token = getToken();
