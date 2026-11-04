@@ -58,18 +58,22 @@
             // 没有令牌：退回扣子预览页（不需要鉴权），并裁掉左侧那一栏
             document.body.className = 'preview-mode';
             if (tip) tip.style.display = 'none';
-            var l = 420, t2 = 0;
+            var l = 420, t2 = 0, b2 = 0, r2 = 0;
             try {
                 var sl = parseInt(localStorage.getItem('xk_crop_left'), 10);
                 var st = parseInt(localStorage.getItem('xk_crop_top'), 10);
+                var sb = parseInt(localStorage.getItem('xk_crop_bottom'), 10);
+                var sr = parseInt(localStorage.getItem('xk_crop_right'), 10);
                 if (!isNaN(sl) && sl >= 0) l = sl;
                 if (!isNaN(st) && st >= 0) t2 = st;
+                if (!isNaN(sb) && sb >= 0) b2 = sb;
+                if (!isNaN(sr) && sr >= 0) r2 = sr;
             } catch (e) {}
             frame.style.position = 'absolute';
             frame.style.left = (-l) + 'px';
             frame.style.top = (-t2) + 'px';
-            frame.style.width = 'calc(100% + ' + l + 'px)';
-            frame.style.height = 'calc(100% + ' + t2 + 'px)';
+            frame.style.width = 'calc(100% + ' + (l + r2) + 'px)';
+            frame.style.height = 'calc(100% + ' + (t2 + b2) + 'px)';
             frame.src = 'https://code.coze.cn/p/7703769752451399722/preview?link_share=true';
         } else {
             frame.src = XK_SDK_ORIGIN + '/';

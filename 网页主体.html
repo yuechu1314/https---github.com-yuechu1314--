@@ -384,6 +384,7 @@
             --xk-crop: 0px;
             --xk-crop-top: 0px;
             --xk-crop-bottom: 0px;
+            --xk-crop-right: 0px;
         }
         @keyframes xk-slide { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
         .xk-head {
@@ -409,7 +410,7 @@
             position: absolute; border: 0; background: #fff; display: block;
             left: calc(0px - var(--xk-crop));
             top: calc(0px - var(--xk-crop-top));
-            width: calc(100% + var(--xk-crop));
+            width: calc(100% + var(--xk-crop) + var(--xk-crop-right));
             height: calc(100% + var(--xk-crop-top) + var(--xk-crop-bottom));
         }
         .xk-loading {
@@ -1226,9 +1227,14 @@
 
     /* 地址栏传参优先：网页主体.html#crop=左,上,下（标定页的「用这组参数打开主页」就是这个） */
     const XK_HASH_CROP = (function () {
-        var m = /crop=([0-9]+),([0-9]+),([0-9]+)/.exec(location.hash || '');
+        var m = /crop=([0-9]+),([0-9]+),([0-9]+)(?:,([0-9]+))?/.exec(location.hash || '');
         if (!m) return null;
-        return { left: parseInt(m[1], 10), top: parseInt(m[2], 10), bottom: parseInt(m[3], 10) };
+        return {
+            left: parseInt(m[1], 10),
+            top: parseInt(m[2], 10),
+            bottom: parseInt(m[3], 10),
+            right: m[4] ? parseInt(m[4], 10) : 0
+        };
     })();
     function applyAgentCrop() {
         const dlg = document.querySelector('.xk-dialog');
@@ -1238,29 +1244,35 @@
             dlg.style.setProperty('--xk-crop', '0px');
             dlg.style.setProperty('--xk-crop-top', '0px');
             dlg.style.setProperty('--xk-crop-bottom', '0px');
+            dlg.style.setProperty('--xk-crop-right', '0px');
             return;
         }
-        // 优先级：地址栏 #crop=左,上,下  >  本机保存的标定值  >  默认
+        // 优先级：地址栏 #crop=左,上,下,右  >  本机保存的标定值  >  默认
         let left = XK_PREVIEW_CROP;
         let top = 0;
         let bottom = 0;
+        let right = 0;
         if (XK_HASH_CROP) {
             left = XK_HASH_CROP.left;
             top = XK_HASH_CROP.top;
             bottom = XK_HASH_CROP.bottom;
+            right = XK_HASH_CROP.right;
         } else {
             try {
                 const l = parseInt(localStorage.getItem('xk_crop_left'), 10);
                 const t = parseInt(localStorage.getItem('xk_crop_top'), 10);
                 const b = parseInt(localStorage.getItem('xk_crop_bottom'), 10);
+                const r = parseInt(localStorage.getItem('xk_crop_right'), 10);
                 if (!isNaN(l) && l >= 0) left = l;
                 if (!isNaN(t) && t >= 0) top = t;
                 if (!isNaN(b) && b >= 0) bottom = b;
+                if (!isNaN(r) && r >= 0) right = r;
             } catch (e) {}
         }
         dlg.style.setProperty('--xk-crop', left + 'px');
         dlg.style.setProperty('--xk-crop-top', top + 'px');
         dlg.style.setProperty('--xk-crop-bottom', bottom + 'px');
+        dlg.style.setProperty('--xk-crop-right', right + 'px');
     }
 
     /* 鼠标移到机器人上就先开始加载，点开时通常已经好了 */

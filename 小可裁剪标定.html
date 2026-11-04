@@ -38,6 +38,7 @@
     <div class="ctrl">左裁切 <input type="range" id="left" min="0" max="1200" step="4" value="420"><span class="val" id="leftVal">420px</span></div>
     <div class="ctrl">上裁切 <input type="range" id="top" min="0" max="600" step="4" value="0"><span class="val" id="topVal">0px</span></div>
     <div class="ctrl">下裁切 <input type="range" id="bottom" min="0" max="600" step="4" value="0"><span class="val" id="bottomVal">0px</span></div>
+    <div class="ctrl">右裁切 <input type="range" id="right" min="0" max="600" step="4" value="0"><span class="val" id="rightVal">0px</span></div>
     <button onclick="openMain()">用这组参数打开主页</button>
     <button class="ghost" onclick="save()">只保存到本机</button>
     <button class="ghost" onclick="reset()">恢复默认</button>
@@ -55,6 +56,7 @@
     var leftEl = document.getElementById('left');
     var topEl = document.getElementById('top');
     var bottomEl = document.getElementById('bottom');
+    var rightEl = document.getElementById('right');
 
     function num(k, d) {
         try { var v = parseInt(localStorage.getItem(k), 10); if (!isNaN(v) && v >= 0) return v; } catch (e) {}
@@ -65,18 +67,20 @@
         var l = parseInt(leftEl.value, 10);
         var t = parseInt(topEl.value, 10);
         var b = parseInt(bottomEl.value, 10);
+        var r = parseInt(rightEl.value, 10);
         document.getElementById('leftVal').textContent = l + 'px';
         document.getElementById('topVal').textContent = t + 'px';
         document.getElementById('bottomVal').textContent = b + 'px';
+        document.getElementById('rightVal').textContent = r + 'px';
         // iframe 往左上挪，容器 overflow 裁掉挪出去的部分
         frame.style.left = (-l) + 'px';
         frame.style.top = (-t) + 'px';
-        frame.style.width = (stage.clientWidth + l) + 'px';
+        frame.style.width = (stage.clientWidth + l + r) + 'px';
         frame.style.height = (stage.clientHeight + t + b) + 'px';
     }
 
     function openMain() {
-        var u = '网页主体.html#crop=' + leftEl.value + ',' + topEl.value + ',' + bottomEl.value;
+        var u = '网页主体.html#crop=' + leftEl.value + ',' + topEl.value + ',' + bottomEl.value + ',' + rightEl.value;
         window.open(u, '_blank');
         document.getElementById('hintbar').textContent =
             '已在新标签打开主页，参数：左 ' + leftEl.value + ' / 上 ' + topEl.value + ' / 下 ' + bottomEl.value;
@@ -86,6 +90,7 @@
             localStorage.setItem('xk_crop_left', leftEl.value);
             localStorage.setItem('xk_crop_top', topEl.value);
             localStorage.setItem('xk_crop_bottom', bottomEl.value);
+            localStorage.setItem('xk_crop_right', rightEl.value);
             document.getElementById('hintbar').textContent =
                 '已保存：左 ' + leftEl.value + ' / 上 ' + topEl.value + ' / 下 ' + bottomEl.value + ' px —— 回主页 Ctrl+F5 生效';
         } catch (e) {
@@ -95,8 +100,8 @@
     }
 
     function reset() {
-        leftEl.value = 420; topEl.value = 0; bottomEl.value = 0; apply();
-        try { localStorage.removeItem('xk_crop_left'); localStorage.removeItem('xk_crop_top'); localStorage.removeItem('xk_crop_bottom'); } catch (e) {}
+        leftEl.value = 420; topEl.value = 0; bottomEl.value = 0; rightEl.value = 0; apply();
+        try { localStorage.removeItem('xk_crop_left'); localStorage.removeItem('xk_crop_top'); localStorage.removeItem('xk_crop_bottom'); localStorage.removeItem('xk_crop_right'); } catch (e) {}
         document.getElementById('hintbar').textContent = '已恢复默认（左 420 / 上 0）';
     }
 
@@ -112,9 +117,11 @@
     leftEl.value = num('xk_crop_left', 420);
     topEl.value = num('xk_crop_top', 0);
     bottomEl.value = num('xk_crop_bottom', 0);
+    rightEl.value = num('xk_crop_right', 0);
     leftEl.addEventListener('input', apply);
     topEl.addEventListener('input', apply);
     bottomEl.addEventListener('input', apply);
+    rightEl.addEventListener('input', apply);
     window.addEventListener('resize', sizeStage);
     sizeStage();
 </script>
