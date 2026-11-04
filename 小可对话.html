@@ -5,38 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>小可智能助手 · 福建卫职院百事通</title>
 <style>
-    html, body {
-        margin: 0; padding: 0;
-        width: 100%; height: 100%;
-        overflow: hidden;
-        background: #f5f7fd;
-    }
-    /* 扣子页面整体向左偏移，把左侧「聊天记录」那一列推出可视区域，再用 overflow 裁掉 */
-    .xk-stage {
-        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        overflow: hidden;
-        background: #fff;
-    }
-    .xk-stage iframe {
-        position: absolute; top: 0;
-        left: -264px;                       /* 裁掉的左侧宽度，可微调 */
-        width: calc(100% + 264px);
-        height: 100%;
-        border: 0;
-        background: #fff;
-        display: block;
-    }
-    /* 窄屏时扣子页面本身就是单列布局，不再裁切 */
-    @media (max-width: 768px) {
-        .xk-stage iframe { left: 0; width: 100%; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #f5f7fd; }
+    #frame { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+    #tip {
+        position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+        font: 14px/2 "Microsoft YaHei", "微软雅黑", Arial, sans-serif; color: #6e7a99;
+        text-align: center; pointer-events: none;
     }
 </style>
 </head>
 <body>
-    <div class="xk-stage">
-        <iframe src="https://code.coze.cn/p/7703769752451399722/preview?link_share=true"
-                title="小可智能助手"
-                allow="microphone; camera; clipboard-read; clipboard-write"></iframe>
-    </div>
+    <div id="tip">正在连接小可…</div>
+    <iframe id="frame" src="about:blank" title="小可智能助手" allow="microphone; camera; clipboard-read; clipboard-write"></iframe>
+    <script>
+        var XK_SDK_ORIGIN = 'https://sdk.coze.site';
+        var XK_PROJECT_ID = '7703769752451399722';
+        // 令牌写在前端，任何人查看源码都能拿到；演示结束后请去扣子后台重置
+        var XK_SDK_TOKEN = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjI0YzRiODNiLWM0N2MtNGY1Ni05YjdhLTNmODhmNTNmNGY3YyJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbIm5zSXhkeng1bU9ZUWFNaWJHZ2dNcTJ6ekxTWnlsUW9vIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzkzODA5Nzk5LCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NzAzODAyMjUxOTc3OTQ5MjQ3Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NzA0MzU0NDI1OTYzMjgyNDUxIn0.PeAfX7T-Cvvz09T0_LupFj1K1n2C8QbCB44ZtwtWpKFzARcXb-PRHYnE-OKo2APwIVmiQdC6jbnpxI4eeSsQs1fpChYqkCEZ8CqST_w7-3q3pein_p4dpzT1cCUgQx5t5eES6VwwiT4wccHoUM_qHuzhrvpwX3qG234cLCAOucCzUm4lRptowWS0_nvWIXp9rJAKs3B9T4I-wspGhWdmr2MkW0lmzAqUZdIF2kQqOSAYhx5FGJY_39I4_9RDnM81YLW1xUh3rtMnvLPZzqyczbHN_RCL2NR1oSNencNMAWdxCIsuJNG5ingcOROCQR7Dx4eSU3Y4DxTXsSQj4oHQ_w';
+        var frame = document.getElementById('frame');
+        var tip = document.getElementById('tip');
+
+        window.addEventListener('message', function (event) {
+            if (event.origin !== XK_SDK_ORIGIN) return;
+            var data = event.data || {};
+            if (!frame.contentWindow) return;
+
+            if (data.type === 'IFRAME_READY') {
+                frame.contentWindow.postMessage({
+                    type: 'INIT',
+                    payload: { token: XK_SDK_TOKEN, projectId: XK_PROJECT_ID }
+                }, XK_SDK_ORIGIN);
+                tip.style.display = 'none';
+            }
+            if (data.type === 'TOKEN_EXPIRED') {
+                frame.contentWindow.postMessage({
+                    type: 'UPDATE_TOKEN',
+                    payload: { token: XK_SDK_TOKEN }
+                }, XK_SDK_ORIGIN);
+            }
+        });
+
+        frame.src = XK_SDK_ORIGIN + '/';
+        setTimeout(function () { if (tip) tip.style.display = 'none'; }, 10000);
+    </script>
 </body>
 </html>

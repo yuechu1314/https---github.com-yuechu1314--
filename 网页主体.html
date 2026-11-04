@@ -381,7 +381,7 @@
             background: #fff; border-radius: 22px; overflow: hidden;
             box-shadow: 0 26px 70px rgba(29,42,74,0.30);
             animation: xk-slide 0.26s ease;
-            --xk-crop: 420px;
+            --xk-crop: 0px;
         }
         @keyframes xk-slide { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
         .xk-head {
@@ -597,8 +597,8 @@
             </div>
             <div class="xk-stage">
                 <iframe id="xkFrame" title="小可智能助手" src="about:blank" allow="microphone; camera; clipboard-read; clipboard-write"></iframe>
-                <div class="xk-loading" id="xkLoading"><div class="xk-spinner"></div><div>正在加载小可智能助手…<br><span style="font-size:12px;color:#8d95b3;">首次打开需要 10–30 秒，之后就快了</span></div></div>
-                <div class="xk-hint" id="xkHint">加载较慢或页面空白？<button onclick="openAgentWindow()">在新窗口打开</button></div>
+                <div class="xk-loading" id="xkLoading"><div class="xk-spinner"></div><div>正在连接小可…<br><span style="font-size:12px;color:#8d95b3;">首次约需几秒，之后秒开</span></div></div>
+                <div class="xk-hint" id="xkHint">加载失败或空白？<button onclick="openAgentWindow()">在新窗口打开</button></div>
             </div>
         </div>
     </div>
@@ -1200,9 +1200,11 @@
         p.scrollIntoView({behavior:'smooth',block:'start'});
     }
 
-    /* ==================== 小可智能体 · 内嵌窗口控制 ==================== */
-    const XK_AGENT_URL = 'https://code.coze.cn/p/7703769752451399722/preview?link_share=true';
-    const XK_CROP_FIXED = 420;       // 左侧固定裁掉 420px，写死不提供调整
+    /* ==================== 小可智能体 · 扣子编程 Web SDK 嵌入 ==================== */
+    const XK_SDK_ORIGIN = 'https://sdk.coze.site';
+    const XK_PROJECT_ID = '7703769752451399722';
+    // ⚠️ 令牌写在前端，任何人查看源码都能拿到；演示结束后请去扣子后台重置
+    const XK_SDK_TOKEN = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjI0YzRiODNiLWM0N2MtNGY1Ni05YjdhLTNmODhmNTNmNGY3YyJ9.eyJpc3MiOiJodHRwczovL2FwaS5jb3plLmNuIiwiYXVkIjpbIm5zSXhkeng1bU9ZUWFNaWJHZ2dNcTJ6ekxTWnlsUW9vIl0sImV4cCI6ODIxMDI2Njg3Njc5OSwiaWF0IjoxNzkzODA5Nzk5LCJzdWIiOiJzcGlmZmU6Ly9hcGkuY296ZS5jbi93b3JrbG9hZF9pZGVudGl0eS9pZDo3NzAzODAyMjUxOTc3OTQ5MjQ3Iiwic3JjIjoiaW5ib3VuZF9hdXRoX2FjY2Vzc190b2tlbl9pZDo3NzA0MzU0NDI1OTYzMjgyNDUxIn0.PeAfX7T-Cvvz09T0_LupFj1K1n2C8QbCB44ZtwtWpKFzARcXb-PRHYnE-OKo2APwIVmiQdC6jbnpxI4eeSsQs1fpChYqkCEZ8CqST_w7-3q3pein_p4dpzT1cCUgQx5t5eES6VwwiT4wccHoUM_qHuzhrvpwX3qG234cLCAOucCzUm4lRptowWS0_nvWIXp9rJAKs3B9T4I-wspGhWdmr2MkW0lmzAqUZdIF2kQqOSAYhx5FGJY_39I4_9RDnM81YLW1xUh3rtMnvLPZzqyczbHN_RCL2NR1oSNencNMAWdxCIsuJNG5ingcOROCQR7Dx4eSU3Y4DxTXsSQj4oHQ_w';
     let xkLoaded = false;
     let xkLoadingStarted = false;
     let xkHintTimer = null;
@@ -1211,15 +1213,21 @@
     function applyAgentCrop() {
         const dlg = document.querySelector('.xk-dialog');
         if (!dlg) return;
-        // 手机端页面本身就是窄屏布局，不再裁切
-        const isMobile = window.matchMedia('(max-width: 768px)').matches;
-        dlg.style.setProperty('--xk-crop', (isMobile ? 0 : XK_CROP_FIXED) + 'px');
+        dlg.style.setProperty('--xk-crop', '0px');   // SDK 自带干净界面，不再裁切
     }
 
     /* 鼠标移到机器人上就先开始加载，点开时通常已经好了 */
     function preloadAgent() {
         if (xkLoaded || xkLoadingStarted) return;
         loadAgentFrame();
+    }
+
+    function hideAgentLoading() {
+        const loading = document.getElementById('xkLoading');
+        if (loading) loading.classList.add('hide');
+        clearTimeout(xkHintTimer);
+        xkLoaded = true;
+        xkLoadingStarted = false;
     }
 
     function loadAgentFrame() {
@@ -1233,25 +1241,47 @@
         xkLoaded = false;
         xkLoadingStarted = true;
 
-        frame.onload = function () {
-            if (!frame.src || frame.src.indexOf('about:blank') === 0) return;
-            xkLoaded = true;
-            xkLoadingStarted = false;
-            loading.classList.add('hide');
-            clearTimeout(xkHintTimer);
-        };
-
         clearTimeout(xkHintTimer);
         clearTimeout(xkHintHideTimer);
-        frame.src = 'about:blank';
-        setTimeout(function () { frame.src = XK_AGENT_URL; }, 30);
+        frame.src = XK_SDK_ORIGIN + '/';
 
+        // 兜底：迟迟没握手就先撤掉遮罩并给提示
         xkHintTimer = setTimeout(function () {
             if (xkLoaded) return;
+            loading.classList.add('hide');
             hint.classList.add('show');
             xkHintHideTimer = setTimeout(function () { hint.classList.remove('show'); }, 9000);
-        }, 6000);
+        }, 8000);
     }
+
+    /* 与 SDK iframe 握手：收到 IFRAME_READY 后发送 INIT */
+    window.addEventListener('message', function (event) {
+        if (event.origin !== XK_SDK_ORIGIN) return;
+        const data = event.data || {};
+        const frame = document.getElementById('xkFrame');
+        if (!frame || !frame.contentWindow) return;
+
+        if (data.type === 'IFRAME_READY') {
+            frame.contentWindow.postMessage({
+                type: 'INIT',
+                payload: { token: XK_SDK_TOKEN, projectId: XK_PROJECT_ID }
+            }, XK_SDK_ORIGIN);
+            hideAgentLoading();
+        }
+        if (data.type === 'TOKEN_EXPIRED') {
+            frame.contentWindow.postMessage({
+                type: 'UPDATE_TOKEN',
+                payload: { token: XK_SDK_TOKEN }
+            }, XK_SDK_ORIGIN);
+        }
+        // 鉴权类报错：把提示亮出来
+        if (String(data.type || '').toUpperCase().indexOf('INVALID') > -1 ||
+            String(data.type || '').toUpperCase().indexOf('ERROR') > -1) {
+            console.warn('[小可] SDK 返回异常：', data);
+            const hint = document.getElementById('xkHint');
+            if (hint) hint.classList.add('show');
+        }
+    });
 
     function openAgent() {
         try {
