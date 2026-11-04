@@ -38,7 +38,8 @@
     <div class="ctrl">左裁切 <input type="range" id="left" min="0" max="1200" step="4" value="420"><span class="val" id="leftVal">420px</span></div>
     <div class="ctrl">上裁切 <input type="range" id="top" min="0" max="600" step="4" value="0"><span class="val" id="topVal">0px</span></div>
     <div class="ctrl">下裁切 <input type="range" id="bottom" min="0" max="600" step="4" value="0"><span class="val" id="bottomVal">0px</span></div>
-    <button onclick="save()">保存到本机</button>
+    <button onclick="openMain()">用这组参数打开主页</button>
+    <button class="ghost" onclick="save()">只保存到本机</button>
     <button class="ghost" onclick="reset()">恢复默认</button>
 </div>
 
@@ -46,7 +47,7 @@
     <iframe id="frame" src="https://code.coze.cn/p/7703769752451399722/preview?link_share=true"></iframe>
 </div>
 
-<div class="hintbar" id="hintbar">这个虚线框和主页小窗一样大：拖滑块把左边编辑记录、顶部工具栏挪出去，只留对话区 → 保存 → 回主页 Ctrl+F5</div>
+<div class="hintbar" id="hintbar">这个虚线框和主页小窗一样大：拖滑块拖滑块把不要的部分挪出虚线框 → 点「用这组参数打开主页」</div>
 
 <script>
     var frame = document.getElementById('frame');
@@ -74,6 +75,12 @@
         frame.style.height = (stage.clientHeight + t + b) + 'px';
     }
 
+    function openMain() {
+        var u = '网页主体.html#crop=' + leftEl.value + ',' + topEl.value + ',' + bottomEl.value;
+        window.open(u, '_blank');
+        document.getElementById('hintbar').textContent =
+            '已在新标签打开主页，参数：左 ' + leftEl.value + ' / 上 ' + topEl.value + ' / 下 ' + bottomEl.value;
+    }
     function save() {
         try {
             localStorage.setItem('xk_crop_left', leftEl.value);
