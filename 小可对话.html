@@ -55,7 +55,10 @@
         });
 
         if (!XK_SDK_TOKEN || XK_SDK_TOKEN === 'YOUR_TOKEN') {
-            tip.innerHTML = '还没有配置访问令牌<br>双击「小可SDK测试.html」填一次即可';
+            // 没有令牌：退回扣子预览页（不需要鉴权），并裁掉左侧那一栏
+            document.body.className = 'preview-mode';
+            if (tip) tip.style.display = 'none';
+            frame.src = 'https://code.coze.cn/p/7703769752451399722/preview?link_share=true';
         } else {
             frame.src = XK_SDK_ORIGIN + '/';
         }
