@@ -20,8 +20,10 @@
              font-family: inherit; color: #fff; background: linear-gradient(135deg, var(--blue-mid), var(--blue-deep));
              box-shadow: 0 6px 16px rgba(51,75,131,0.25); white-space: nowrap; }
     button.ghost { background: #f2f5fc; color: var(--blue-deep); box-shadow: none; }
-    .stage { position: fixed; left: 0; right: 0; top: 64px; bottom: 0; overflow: hidden; background: #fff;
-             border-top: 3px dashed var(--pink); }
+    /* 这个框的尺寸和主页小窗完全一致，所以这里调出来的数字可以直接用 */
+    .stage { position: fixed; left: 50%; top: calc(50% + 32px); transform: translate(-50%, -50%);
+             overflow: hidden; background: #fff; border: 2px dashed var(--pink);
+             border-radius: 12px; box-shadow: 0 18px 50px rgba(51,75,131,0.18); }
     .stage iframe {
         position: absolute; border: 0; display: block; background: #fff;
     }
@@ -43,7 +45,7 @@
     <iframe id="frame" src="https://code.coze.cn/p/7703769752451399722/preview?link_share=true"></iframe>
 </div>
 
-<div class="hintbar" id="hintbar">拖动上面的滑块，直到框里只剩你要显示的那块 → 点「保存到本机」→ 回主页按 Ctrl+F5</div>
+<div class="hintbar" id="hintbar">这个虚线框和主页小窗一样大：拖滑块把左边编辑记录、顶部工具栏挪出去，只留对话区 → 保存 → 回主页 Ctrl+F5</div>
 
 <script>
     var frame = document.getElementById('frame');
@@ -86,12 +88,21 @@
         document.getElementById('hintbar').textContent = '已恢复默认（左 420 / 上 0）';
     }
 
+    function sizeStage() {
+        // 与主页小窗同样的尺寸规则：宽 33vw（360~560），高 72vh（440~760）
+        var w = Math.min(560, Math.max(360, window.innerWidth * 0.33));
+        var h = Math.min(760, Math.max(440, window.innerHeight * 0.72));
+        stage.style.width = w + 'px';
+        stage.style.height = h + 'px';
+        apply();
+    }
+
     leftEl.value = num('xk_crop_left', 420);
     topEl.value = num('xk_crop_top', 0);
     leftEl.addEventListener('input', apply);
     topEl.addEventListener('input', apply);
-    window.addEventListener('resize', apply);
-    apply();
+    window.addEventListener('resize', sizeStage);
+    sizeStage();
 </script>
 </body>
 </html>
