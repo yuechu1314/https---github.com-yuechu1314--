@@ -376,7 +376,7 @@
             background: #fff; border-radius: 22px; overflow: hidden;
             box-shadow: 0 26px 70px rgba(29,42,74,0.30);
             animation: xk-slide 0.26s ease;
-            --xk-crop: 80px;
+            --xk-crop: 420px;
         }
         @keyframes xk-slide { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
         .xk-head {
@@ -403,26 +403,6 @@
             left: calc(0px - var(--xk-crop));
             width: calc(100% + var(--xk-crop));
         }
-        /* 左侧拖拽手柄：左右拖动微调裁掉的宽度 */
-        .xk-grip {
-            position: absolute; left: 0; top: 0; bottom: 0; width: 14px; z-index: 4;
-            cursor: ew-resize; opacity: 0; transition: opacity 0.2s ease;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .xk-stage:hover .xk-grip, .xk-grip:hover { opacity: 1; }
-        .xk-grip::before {
-            content: ''; width: 4px; height: 36px; border-radius: 4px;
-            background: rgba(51,75,131,0.45); box-shadow: 0 0 0 3px rgba(255,255,255,0.5);
-        }
-        .xk-grip span {
-            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-            background: rgba(43,63,112,0.92); color: #fff; font-size: 11px;
-            padding: 3px 8px; border-radius: 8px; white-space: nowrap;
-            opacity: 0; transition: opacity 0.2s ease; pointer-events: none;
-        }
-        .xk-grip.dragging { opacity: 1; }
-        .xk-grip.peek { opacity: 1; }
-        .xk-grip.dragging span { opacity: 1; }
         .xk-loading {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 2;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -605,7 +585,6 @@
             <div class="xk-head">
                 <div class="xk-head-title"><span class="dot"></span>小可智能助手<small>福建卫职院百事通</small></div>
                 <div class="xk-head-actions">
-                    <button class="xk-btn on" id="xkHistoryBtn" onclick="toggleHistory()" title="显示 / 隐藏左侧聊天记录">☰</button>
                     <button class="xk-btn" onclick="reloadAgent()" title="重新加载">⟳</button>
                     <button class="xk-btn" onclick="openAgentWindow()" title="在新窗口打开">↗</button>
                     <button class="xk-btn" onclick="closeAgent()" title="关闭">✕</button>
@@ -613,7 +592,6 @@
             </div>
             <div class="xk-stage">
                 <iframe id="xkFrame" title="小可智能助手" src="about:blank" allow="microphone; camera; clipboard-read; clipboard-write"></iframe>
-                <div class="xk-grip" id="xkGrip" title="左右拖动，可微调左侧裁掉的宽度"><span id="xkCropVal">80px</span></div>
                 <div class="xk-loading" id="xkLoading"><div class="xk-spinner"></div><div>正在加载小可智能助手…</div></div>
                 <div class="xk-hint" id="xkHint">加载较慢或页面空白？<button onclick="openAgentWindow()">在新窗口打开</button></div>
             </div>
@@ -1219,74 +1197,18 @@
 
     /* ==================== 小可智能体 · 内嵌窗口控制 ==================== */
     const XK_AGENT_URL = 'https://code.coze.cn/p/7703769752451399722/preview?link_share=true';
-    const XK_CROP_DEFAULT = 80;      // 默认裁掉扣子页面左侧那一条的宽度（拖动小窗左边缘可微调，会自动记住）
-    let xkCropPx = XK_CROP_DEFAULT;
-    try { var _cropSaved = parseInt(localStorage.getItem('xkCropPx'), 10); if (!isNaN(_cropSaved) && _cropSaved >= 0) { xkCropPx = _cropSaved; } } catch (e) {}
+    const XK_CROP_FIXED = 420;       // 左侧固定裁掉 420px，写死不提供调整
     let xkLoaded = false;
-    let xkHideHistory = true;        // 默认隐藏左侧那一条，点 ☰ 可临时显示全部
     let xkHintTimer = null;
     let xkHintHideTimer = null;
 
     function applyAgentCrop() {
         const dlg = document.querySelector('.xk-dialog');
         if (!dlg) return;
-        // 手机端扣子页面本身就是窄屏布局，不再额外裁切
+        // 手机端页面本身就是窄屏布局，不再裁切
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
-        dlg.style.setProperty('--xk-crop', (xkHideHistory && !isMobile ? xkCropPx : 0) + 'px');
-        const btn = document.getElementById('xkHistoryBtn');
-        if (btn) {
-            btn.classList.toggle('on', xkHideHistory);
-            btn.title = xkHideHistory ? '当前已隐藏左侧那一条，点击可显示全部' : '当前显示全部，点击可隐藏左侧';
-        }
-        const val = document.getElementById('xkCropVal');
-        if (val) { val.textContent = xkCropPx + 'px'; }
+        dlg.style.setProperty('--xk-crop', (isMobile ? 0 : XK_CROP_FIXED) + 'px');
     }
-
-    /* 拖动小窗左边缘，微调裁掉的宽度，松手自动记住 */
-    (function initAgentCropDrag() {
-        const grip = document.getElementById('xkGrip');
-        if (!grip) return;
-        let startX = 0, startCrop = 0, dragging = false;
-        function point(e) {
-            return (e.touches && e.touches.length) ? e.touches[0].clientX : e.clientX;
-        }
-        function onDown(e) {
-            dragging = true;
-            startX = point(e);
-            startCrop = xkCropPx;
-            grip.classList.add('dragging');
-            e.preventDefault();
-        }
-        function onMove(e) {
-            if (!dragging) return;
-            var px = Math.round(startCrop + (point(e) - startX));
-            px = Math.max(0, Math.min(420, px));
-            xkCropPx = px;
-            xkHideHistory = px > 0;
-            applyAgentCrop();
-            e.preventDefault();
-        }
-        function onUp() {
-            if (!dragging) return;
-            dragging = false;
-            grip.classList.remove('dragging');
-            try { localStorage.setItem('xkCropPx', String(xkCropPx)); } catch (e) {}
-        }
-        grip.addEventListener('mousedown', onDown);
-        grip.addEventListener('touchstart', onDown);
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('touchmove', onMove);
-        document.addEventListener('mouseup', onUp);
-        document.addEventListener('touchend', onUp);
-
-        // 第一次打开时，让手柄闪一下提示可以拖动
-        try {
-            if (!localStorage.getItem('xkCropPx')) {
-                grip.classList.add('peek');
-                setTimeout(function () { grip.classList.remove('peek'); }, 5000);
-            }
-        } catch (e) {}
-    })();
 
     function loadAgentFrame() {
         const frame = document.getElementById('xkFrame');
@@ -1352,11 +1274,6 @@
     }
 
     function reloadAgent() { loadAgentFrame(); }
-
-    function toggleHistory() {
-        xkHideHistory = !xkHideHistory;
-        applyAgentCrop();
-    }
 
     function openAgentWindow() { window.open('小可对话.html', '_blank'); }
 
