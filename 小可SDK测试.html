@@ -3,148 +3,98 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小可 · Chat SDK 接入测试</title>
+<title>小可 · Web SDK 接入测试</title>
 <style>
     :root {
         --blue-deep: #334b83; --blue-mid: #4a63a3; --blue-soft: #b1bfe0;
-        --pink: #ea6181; --pink-soft: #fed7e0; --ink: #24304f; --ink-soft: #475471;
+        --pink: #ea6181; --ink: #24304f; --ink-soft: #475471;
     }
     * { box-sizing: border-box; }
     body {
-        margin: 0; min-height: 100vh; padding: 40px 20px;
-        font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-        color: var(--ink);
+        margin: 0; height: 100vh; display: flex; flex-direction: column;
+        font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif; color: var(--ink);
         background: #f5f7fd;
-        background-image:
-            radial-gradient(circle at 12% 6%, rgba(177,191,224,0.35), transparent 42%),
-            radial-gradient(circle at 88% 94%, rgba(234,97,129,0.10), transparent 34%);
     }
-    .card {
-        max-width: 680px; margin: 0 auto; background: #fff;
-        border-radius: 24px; padding: 32px;
-        box-shadow: 0 12px 40px rgba(51,75,131,0.10);
-        border: 1px solid rgba(51,75,131,0.06);
+    .bar {
+        padding: 14px 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+        background: #fff; box-shadow: 0 2px 16px rgba(51,75,131,0.08); z-index: 2;
     }
-    h1 { font-size: 22px; margin: 0 0 6px; color: var(--blue-deep); }
-    .sub { color: var(--ink-soft); font-size: 14px; line-height: 1.8; margin-bottom: 22px; }
-    label { display: block; font-size: 13px; color: var(--ink-soft); margin: 16px 0 6px; font-weight: bold; }
+    .bar h1 { font-size: 15px; margin: 0 12px 0 0; color: var(--blue-deep); }
     input {
-        width: 100%; padding: 12px 14px; font-size: 14px; color: var(--ink);
-        border: 1px solid #dfe4f2; border-radius: 14px; outline: none;
-        background: #fafbff; transition: border-color .2s, box-shadow .2s;
+        padding: 9px 12px; font-size: 13px; border: 1px solid #dfe4f2; border-radius: 10px;
+        outline: none; background: #fafbff; min-width: 320px;
     }
-    input:focus { border-color: var(--blue-soft); box-shadow: 0 0 0 4px rgba(177,191,224,0.25); }
-    .row { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+    input:focus { border-color: var(--blue-soft); box-shadow: 0 0 0 3px rgba(177,191,224,0.25); }
     button {
-        border: 0; cursor: pointer; font-size: 14px; font-weight: bold;
-        padding: 13px 26px; border-radius: 999px; font-family: inherit;
-        transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+        border: 0; cursor: pointer; font-size: 13px; font-weight: bold; padding: 9px 18px;
+        border-radius: 999px; font-family: inherit; color: #fff;
+        background: linear-gradient(135deg, var(--blue-mid), var(--blue-deep));
+        box-shadow: 0 6px 16px rgba(51,75,131,0.25);
     }
-    .primary { background: linear-gradient(135deg, var(--blue-mid), var(--blue-deep)); color: #fff; box-shadow: 0 8px 22px rgba(51,75,131,0.28); }
-    .primary:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(51,75,131,0.36); }
-    .ghost { background: #f2f5fc; color: var(--blue-deep); }
-    .ghost:hover { background: #e7ecf9; }
-    .hint { margin-top: 18px; font-size: 13px; line-height: 1.9; color: var(--ink-soft); background: #f7f9ff; border-radius: 14px; padding: 14px 16px; }
-    .hint b { color: var(--blue-deep); }
-    .status { margin-top: 16px; font-size: 13px; color: var(--pink); font-weight: bold; min-height: 20px; }
-    ol { margin: 8px 0 0 18px; padding: 0; }
-    li { margin: 6px 0; }
+    button.ghost { background: #f2f5fc; color: var(--blue-deep); box-shadow: none; }
+    .status { font-size: 12px; color: var(--pink); font-weight: bold; margin-left: auto; }
+    .stage { flex: 1; position: relative; overflow: hidden; }
+    #sdk { width: 100%; height: 100%; border: 0; }
+    .tip {
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        text-align: center; color: var(--ink-soft); font-size: 13px; line-height: 2; padding: 30px;
+    }
 </style>
 </head>
 <body>
-<div class="card">
-    <h1>小可 · Chat SDK 接入测试</h1>
-    <div class="sub">
-        这个页面用来验证「智能体发布到 Chat SDK 后能不能直接用」。填好下面两项，点启动，右下角会弹出真正的聊天窗，能正常问答就说明通道打通了。
-    </div>
-
-    <label for="botId">智能体 ID（botId）</label>
-    <input id="botId" placeholder="例如 7408491379703261234，在智能体编排页 URL 里 /bot/ 后面那串数字">
-
-    <label for="token">访问令牌（PAT）</label>
-    <input id="token" type="password" placeholder="pat_ 开头，只在你这台电脑本地保存，不会上传">
-
-    <div class="row">
-        <button class="primary" id="start">启动对话</button>
-        <button class="ghost" id="open">打开聊天窗</button>
-        <button class="ghost" id="clear">清空本地记录</button>
-    </div>
-
-    <div class="status" id="status"></div>
-
-    <div class="hint">
-        <b>还没发布？</b>按这三步来：
-        <ol>
-            <li>扣子 → 打开你的智能体 → 右上角 <b>发布</b> → 勾选 <b>Chat SDK</b>（建议同时勾选 <b>API</b>，否则拿不到开场白）→ 发布</li>
-            <li>在 <b>安装</b> 弹窗里能看到安装代码，里面就有 botId，也可以直接看编排页 URL 里 <code>/bot/</code> 后面那串</li>
-            <li>扣子 → 头像 → <b>设置 → 个人访问令牌</b> → 新建令牌，勾上 Bot 对话、会话管理、消息列表等权限，复制出来的 <code>pat_</code> 就是一串令牌</li>
-        </ol>
+<div class="bar">
+    <h1>小可 · Web SDK 测试</h1>
+    <input id="token" type="password" placeholder="粘贴访问令牌（czs_ 或 pat_ 开头，只存本机）">
+    <button id="start">启动</button>
+    <button class="ghost" id="clear">清空</button>
+    <span class="status" id="status"></span>
+</div>
+<div class="stage">
+    <div id="sdk"></div>
+    <div class="tip" id="tip">
+        projectId 已经填好（7703769752451399722）<br>
+        把令牌填到上面，点「启动」，这里就会出现真正的聊天界面
     </div>
 </div>
 
-<script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.20/libs/cn/index.js"></script>
+<script src="https://lf-cdn.coze.cn/obj/unpkg/latest/coze/web-sdk/dist/js-umd/index.min.js"></script>
 <script>
-    var botInput = document.getElementById('botId');
+    var PROJECT_ID = '7703769752451399722';
     var tokenInput = document.getElementById('token');
     var statusEl = document.getElementById('status');
-    var client = null;
+    var tip = document.getElementById('tip');
+    var started = false;
 
-    try {
-        botInput.value = localStorage.getItem('xk_test_bot') || '';
-        tokenInput.value = localStorage.getItem('xk_test_token') || '';
-    } catch (e) {}
+    try { tokenInput.value = localStorage.getItem('xk_wsdk_token') || ''; } catch (e) {}
 
     function say(msg) { statusEl.textContent = msg || ''; }
 
     function start() {
-        var botId = botInput.value.trim();
         var token = tokenInput.value.trim();
-        if (!botId || !token) { say('先把 botId 和令牌都填上'); return; }
-        if (typeof CozeWebSDK === 'undefined') { say('SDK 没加载成功，检查下网络或脚本地址'); return; }
+        if (!token) { say('先把令牌填上'); return; }
+        if (typeof cozeWebSDK === 'undefined') { say('SDK 脚本没加载成功，检查网络'); return; }
+        try { localStorage.setItem('xk_wsdk_token', token); } catch (e) {}
+        if (started && cozeWebSDK.destroy) { try { cozeWebSDK.destroy(); } catch (e) {} }
 
-        try {
-            localStorage.setItem('xk_test_bot', botId);
-            localStorage.setItem('xk_test_token', token);
-        } catch (e) {}
-
-        if (client && client.destroy) { try { client.destroy(); } catch (e) {} }
-
-        say('正在初始化…');
-        client = new CozeWebSDK.WebChatClient({
-            config: {
-                botId: botId,
-                isIframe: false
-            },
-            auth: {
-                type: 'token',
-                token: token,
-                onRefreshToken: function () { return token; }
-            },
-            userInfo: {
-                id: 'test-' + Date.now(),
-                nickname: '测试同学'
-            },
-            ui: {
-                base: { layout: 'pc', lang: 'zh-CN', zIndex: 99999 },
-                asstBtn: { isNeed: false },
-                footer: { isShow: false }
-            }
+        say('初始化中…');
+        cozeWebSDK.init({
+            projectId: PROJECT_ID,
+            container: document.getElementById('sdk'),
+            style: 'width:100%;height:100%;border:0;',
+            theme: 'light',
+            refreshToken: function () { return Promise.resolve(token); },
+            onIframeReady: function () { tip.style.display = 'none'; say('已就绪'); },
+            onTokenInvalid: function () { say('令牌无效或权限不足'); },
+            onTokenExpired: function () { say('令牌已过期'); },
+            onNetworkError: function () { say('网络异常'); }
         });
-
-        setTimeout(function () {
-            try { client.showChatBot(); say('已打开聊天窗，试着问一句「奖学金怎么评」'); }
-            catch (e) { say('打开聊天窗失败：' + e.message); }
-        }, 800);
+        started = true;
     }
 
     document.getElementById('start').addEventListener('click', start);
-    document.getElementById('open').addEventListener('click', function () {
-        if (!client) { say('先点启动对话'); return; }
-        try { client.showChatBot(); } catch (e) { say('打开失败：' + e.message); }
-    });
     document.getElementById('clear').addEventListener('click', function () {
-        try { localStorage.removeItem('xk_test_bot'); localStorage.removeItem('xk_test_token'); } catch (e) {}
-        botInput.value = ''; tokenInput.value = ''; say('已清空本地保存的 botId 和令牌');
+        try { localStorage.removeItem('xk_wsdk_token'); } catch (e) {}
+        tokenInput.value = ''; say('已清空本地令牌');
     });
 </script>
 </body>
