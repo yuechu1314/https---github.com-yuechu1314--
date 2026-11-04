@@ -14,9 +14,9 @@
             --pink:      #ea6181;
             --pink-soft: #fed7e0;
             --pink-tint: #fde8ee;
-            --ink:       #2c3a5e;
-            --ink-soft:  #6b7699;
-            --ink-mute:  #9aa2be;
+            --ink:       #24304f;
+            --ink-soft:  #475471;
+            --ink-mute:  #6e7a99;
             --line:      #e6eaf6;
             --card:      #ffffff;
         }
@@ -30,8 +30,8 @@
             color: var(--ink);
             background-color: #f5f7fd;
             background-image:
-                radial-gradient(circle at 12% 6%, rgba(177,191,224,0.38), transparent 42%),
-                radial-gradient(circle at 88% 94%, rgba(254,215,224,0.42), transparent 42%),
+                radial-gradient(circle at 12% 6%, rgba(177,191,224,0.30), transparent 40%),
+                radial-gradient(circle at 90% 96%, rgba(234,97,129,0.10), transparent 34%),
                 linear-gradient(rgba(51,75,131,0.035) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(51,75,131,0.035) 1px, transparent 1px);
             background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
@@ -40,8 +40,8 @@
         body::before {
             content: '';
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(ellipse at 20% 10%, rgba(177,191,224,0.30) 0%, transparent 55%),
-                        radial-gradient(ellipse at 85% 88%, rgba(254,215,224,0.35) 0%, transparent 55%);
+            background: radial-gradient(ellipse at 20% 10%, rgba(177,191,224,0.22) 0%, transparent 55%),
+                        radial-gradient(ellipse at 85% 88%, rgba(234,97,129,0.09) 0%, transparent 55%);
             pointer-events: none;
             z-index: -1;
         }
@@ -68,7 +68,7 @@
 
         .section-toggle {
             padding: 13px 18px; font-size: 12px;
-            color: rgba(255,255,255,0.62); letter-spacing: 2px;
+            color: rgba(255,255,255,0.78); letter-spacing: 2px;
             cursor: pointer; user-select: none;
             display: flex; align-items: center;
             border-radius: 14px; margin: 4px 10px;
@@ -89,7 +89,7 @@
         .nav-item {
             display: flex; align-items: center;
             padding: 11px 16px; margin: 3px 10px;
-            cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.74);
+            cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.88);
             border-radius: 14px;
             transition: all 0.25s ease; user-select: none;
         }
@@ -105,7 +105,7 @@
 
         .sidebar-footer {
             padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.10);
-            font-size: 11px; color: rgba(255,255,255,0.45); text-align: center;
+            font-size: 11px; color: rgba(255,255,255,0.60); text-align: center;
         }
 
         .main-content {
@@ -147,7 +147,7 @@
         .hero-text { flex: 1; }
         .hero-text h1 { font-size: 34px; font-weight: bold; margin-bottom: 12px; letter-spacing: 3px; line-height: 1.2; }
         .hero-text h1 span { color: var(--pink-soft); }
-        .hero-text p { font-size: 14px; color: rgba(255,255,255,0.80); line-height: 1.9; max-width: 500px; }
+        .hero-text p { font-size: 14px; color: rgba(255,255,255,0.90); line-height: 1.9; max-width: 500px; }
         .hero-stats { display: flex; gap: 16px; }
         .hero-stat-item {
             background: rgba(255,255,255,0.14); backdrop-filter: blur(8px);
@@ -176,7 +176,7 @@
             display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;
         }
         .stats-card .stats-icon.blue { background: linear-gradient(135deg, #e7ecf9, #d5dff3); }
-        .stats-card .stats-icon.orange { background: linear-gradient(135deg, #fde8ee, #fbd3df); }
+        .stats-card .stats-icon.orange { background: linear-gradient(135deg, #eef1fb, #e2e8f7); }
         .stats-card .stats-icon.green { background: linear-gradient(135deg, #eef2fb, #dde5f7); }
         .stats-card .stats-info .stats-value { font-size: 22px; font-weight: bold; color: var(--blue-deep); line-height: 1.2; }
         .stats-card .stats-info .stats-label { font-size: 12px; color: var(--ink-mute); margin-top: 3px; }
@@ -201,7 +201,7 @@
         }
         .college-card::after {
             content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 0;
-            background: linear-gradient(180deg, transparent, rgba(254,215,224,0.40));
+            background: linear-gradient(180deg, transparent, rgba(186,199,230,0.55));
             transition: height 0.35s ease;
         }
         .college-card:hover {
@@ -215,7 +215,7 @@
             width: 48px; height: 48px; border-radius: 16px;
             display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;
         }
-        .college-card .card-icon.nursing { background: linear-gradient(135deg, #fde8ee, #fbc9d8); }
+        .college-card .card-icon.nursing { background: linear-gradient(135deg, #fdeef2, #fbe2ea); }
         .college-card .card-icon.pharmacy { background: linear-gradient(135deg, #eef1fb, #dfe6f7); }
         .college-card .card-icon.medical { background: linear-gradient(135deg, #e7ecf9, #cfd9f0); }
         .college-card .card-icon.tech { background: linear-gradient(135deg, #eeecfb, #ded9f3); }
@@ -246,7 +246,7 @@
             display: flex; align-items: center; margin-bottom: 18px;
             padding-bottom: 14px; border-bottom: 2px solid var(--line);
         }
-        .content-panel .panel-header.dept { border-bottom-color: var(--pink); }
+        .content-panel .panel-header.dept { border-bottom-color: var(--blue-soft); }
         .content-panel .panel-header.college { border-bottom-color: var(--blue-deep); }
         .content-panel .panel-header .panel-icon { font-size: 28px; margin-right: 12px; }
         .content-panel .panel-header h3 { font-size: 21px; color: var(--blue-deep); }
@@ -298,9 +298,9 @@
         }
         .rules-table thead th:first-child { border-top-left-radius: 14px; }
         .rules-table thead th:last-child { border-top-right-radius: 14px; }
-        .rules-table tbody td { padding: 10px 14px; border-bottom: 1px solid #f0f3fa; color: #5f6885; }
+        .rules-table tbody td { padding: 10px 14px; border-bottom: 1px solid #f0f3fa; color: #45506b; }
         .rules-table tbody tr { transition: background 0.2s ease; }
-        .rules-table tbody tr:hover { background: #fdf3f6; }
+        .rules-table tbody tr:hover { background: #f4f7fd; }
         .rules-table .rule-id { color: #a9b0c8; font-size: 12px; width: 40px; }
         .rules-table .rule-title { font-weight: bold; color: var(--blue-deep); white-space: nowrap; }
         .rules-table .rule-points { color: var(--pink); font-weight: bold; text-align: center; width: 80px; white-space: nowrap; }
@@ -564,8 +564,8 @@
             </div>
 
             <div class="content-panel" id="scholarshipPanel">
-                <div class="panel-header scholarship" style="border-bottom-color:#ea6181;"><span class="panel-icon"><svg class="ico"><use href="#i-cap"/></svg></span><h3 id="scholarshipTitle">福建卫生职业技术学院学生奖学金评选办法</h3><span class="panel-badge orange" id="scholarshipBadge">规章制度</span></div>
-                <div id="scholarshipContent" style="font-size:14px;color:#5f6885;line-height:2.2;"></div>
+                <div class="panel-header scholarship" style="border-bottom-color:#b1bfe0;"><span class="panel-icon"><svg class="ico"><use href="#i-cap"/></svg></span><h3 id="scholarshipTitle">福建卫生职业技术学院学生奖学金评选办法</h3><span class="panel-badge orange" id="scholarshipBadge">规章制度</span></div>
+                <div id="scholarshipContent" style="font-size:14.5px;color:#45506b;line-height:2.15;"></div>
             </div>
         </div>
     </main>
