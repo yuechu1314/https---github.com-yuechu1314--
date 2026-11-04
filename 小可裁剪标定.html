@@ -38,7 +38,8 @@
     <div class="ctrl">左裁切 <input type="range" id="left" min="0" max="1200" step="4" value="420"><span class="val" id="leftVal">420px</span></div>
     <div class="ctrl">上裁切 <input type="range" id="top" min="0" max="600" step="4" value="0"><span class="val" id="topVal">0px</span></div>
     <div class="ctrl">下裁切 <input type="range" id="bottom" min="0" max="600" step="4" value="0"><span class="val" id="bottomVal">0px</span></div>
-    <div class="ctrl">右裁切 <input type="range" id="right" min="0" max="600" step="4" value="0"><span class="val" id="rightVal">0px</span></div>
+    <div class="ctrl">宽 <input type="range" id="width" min="320" max="1400" step="10" value="560"><span class="val" id="widthVal">560px</span></div>
+    <div class="ctrl">高 <input type="range" id="height" min="400" max="1000" step="10" value="760"><span class="val" id="heightVal">760px</span></div>    <div class="ctrl">右裁切 <input type="range" id="right" min="0" max="600" step="4" value="0"><span class="val" id="rightVal">0px</span></div>
     <button onclick="openMain()">用这组参数打开主页</button>
     <button class="ghost" onclick="save()">只保存到本机</button>
     <button class="ghost" onclick="reset()">恢复默认</button>
@@ -57,6 +58,8 @@
     var topEl = document.getElementById('top');
     var bottomEl = document.getElementById('bottom');
     var rightEl = document.getElementById('right');
+    var widthEl = document.getElementById('width');
+    var heightEl = document.getElementById('height');
 
     function num(k, d) {
         try { var v = parseInt(localStorage.getItem(k), 10); if (!isNaN(v) && v >= 0) return v; } catch (e) {}
@@ -80,7 +83,7 @@
     }
 
     function openMain() {
-        var u = '网页主体.html#crop=' + leftEl.value + ',' + topEl.value + ',' + bottomEl.value + ',' + rightEl.value;
+        var u = '网页主体.html#crop=' + leftEl.value + ',' + topEl.value + ',' + bottomEl.value + ',' + rightEl.value + '&size=' + widthEl.value + ',' + heightEl.value;
         window.open(u, '_blank');
         document.getElementById('hintbar').textContent =
             '已在新标签打开主页，参数：左 ' + leftEl.value + ' / 上 ' + topEl.value + ' / 下 ' + bottomEl.value;
@@ -91,6 +94,8 @@
             localStorage.setItem('xk_crop_top', topEl.value);
             localStorage.setItem('xk_crop_bottom', bottomEl.value);
             localStorage.setItem('xk_crop_right', rightEl.value);
+            localStorage.setItem('xk_size_w', widthEl.value);
+            localStorage.setItem('xk_size_h', heightEl.value);
             document.getElementById('hintbar').textContent =
                 '已保存：左 ' + leftEl.value + ' / 上 ' + topEl.value + ' / 下 ' + bottomEl.value + ' px —— 回主页 Ctrl+F5 生效';
         } catch (e) {
@@ -106,13 +111,10 @@
     }
 
     function sizeStage() {
-        // 优先用小窗里拖动保存的尺寸；没有就按默认比例
-        var sw = num('xk_size_w', 0);
-        var sh = num('xk_size_h', 0);
-        var w = sw ? Math.min(sw, window.innerWidth - 40) : Math.min(560, Math.max(360, window.innerWidth * 0.33));
-        var h = sh ? Math.min(sh, window.innerHeight - 120) : Math.min(760, Math.max(440, window.innerHeight * 0.72));
-        stage.style.width = w + 'px';
-        stage.style.height = h + 'px';
+        document.getElementById('widthVal').textContent = widthEl.value + 'px';
+        document.getElementById('heightVal').textContent = heightEl.value + 'px';
+        stage.style.width = parseInt(widthEl.value, 10) + 'px';
+        stage.style.height = parseInt(heightEl.value, 10) + 'px';
         apply();
     }
 
@@ -120,10 +122,14 @@
     topEl.value = num('xk_crop_top', 0);
     bottomEl.value = num('xk_crop_bottom', 0);
     rightEl.value = num('xk_crop_right', 0);
+    widthEl.value = num('xk_size_w', 560);
+    heightEl.value = num('xk_size_h', 760);
     leftEl.addEventListener('input', apply);
     topEl.addEventListener('input', apply);
     bottomEl.addEventListener('input', apply);
     rightEl.addEventListener('input', apply);
+    widthEl.addEventListener('input', sizeStage);
+    heightEl.addEventListener('input', sizeStage);
     window.addEventListener('resize', sizeStage);
     sizeStage();
 </script>
