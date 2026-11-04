@@ -106,9 +106,11 @@
     }
 
     function sizeStage() {
-        // 与主页小窗同样的尺寸规则：宽 33vw（360~560），高 72vh（440~760）
-        var w = Math.min(560, Math.max(360, window.innerWidth * 0.33));
-        var h = Math.min(760, Math.max(440, window.innerHeight * 0.72));
+        // 优先用小窗里拖动保存的尺寸；没有就按默认比例
+        var sw = num('xk_size_w', 0);
+        var sh = num('xk_size_h', 0);
+        var w = sw ? Math.min(sw, window.innerWidth - 40) : Math.min(560, Math.max(360, window.innerWidth * 0.33));
+        var h = sh ? Math.min(sh, window.innerHeight - 120) : Math.min(760, Math.max(440, window.innerHeight * 0.72));
         stage.style.width = w + 'px';
         stage.style.height = h + 'px';
         apply();
