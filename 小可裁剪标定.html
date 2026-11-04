@@ -105,9 +105,9 @@
     }
 
     function reset() {
-        leftEl.value = 420; topEl.value = 0; bottomEl.value = 0; rightEl.value = 0; apply();
+        leftEl.value = 788; topEl.value = 108; bottomEl.value = 44; rightEl.value = 0; widthEl.value = 400; heightEl.value = 540; sizeStage();
         try { localStorage.removeItem('xk_crop_left'); localStorage.removeItem('xk_crop_top'); localStorage.removeItem('xk_crop_bottom'); localStorage.removeItem('xk_crop_right'); } catch (e) {}
-        document.getElementById('hintbar').textContent = '已恢复默认（左 420 / 上 0）';
+        document.getElementById('hintbar').textContent = '已恢复默认（左 788 / 上 108 / 下 44 / 右 0，400x540）';
     }
 
     function sizeStage() {
@@ -118,12 +118,12 @@
         apply();
     }
 
-    leftEl.value = num('xk_crop_left', 420);
-    topEl.value = num('xk_crop_top', 0);
-    bottomEl.value = num('xk_crop_bottom', 0);
+    leftEl.value = num('xk_crop_left', 788);
+    topEl.value = num('xk_crop_top', 108);
+    bottomEl.value = num('xk_crop_bottom', 44);
     rightEl.value = num('xk_crop_right', 0);
-    widthEl.value = num('xk_size_w', 560);
-    heightEl.value = num('xk_size_h', 760);
+    widthEl.value = num('xk_size_w', 400);
+    heightEl.value = num('xk_size_h', 540);
     leftEl.addEventListener('input', apply);
     topEl.addEventListener('input', apply);
     bottomEl.addEventListener('input', apply);

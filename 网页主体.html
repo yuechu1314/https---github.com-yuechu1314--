@@ -1212,7 +1212,15 @@
     ==================================================== */
     const XK_MODE = 'preview';
     const XK_PREVIEW_URL = 'https://code.coze.cn/p/7703769752451399722/preview?link_share=true';
-    const XK_PREVIEW_CROP = 420;     // preview 模式下左侧被裁掉的宽度
+    /* ===== 【锁定参数】小可对话框的尺寸与裁切，2026-11-05 定版，改页面 UI 时不要动这几行 ===== */
+    const XK_LOCK_LEFT = 788;        // 左裁切
+    const XK_LOCK_TOP = 108;         // 上裁切
+    const XK_LOCK_BOTTOM = 44;       // 下裁切
+    const XK_LOCK_RIGHT = 0;         // 右裁切
+    const XK_LOCK_W = 400;           // 对话框宽
+    const XK_LOCK_H = 540;           // 对话框高
+    /* ============================================================================= */
+    const XK_PREVIEW_CROP = XK_LOCK_LEFT;  // preview 模式下左侧被裁掉的宽度
     const XK_SDK_ORIGIN = 'https://sdk.coze.site';
     const XK_PROJECT_ID = '7703769752451399722';
     // 令牌不写死在仓库里：优先读本机保存的（在「小可SDK测试.html」里填一次就会存在这）
@@ -1248,10 +1256,10 @@
             return;
         }
         // 优先级：地址栏 #crop=左,上,下,右  >  本机保存的标定值  >  默认
-        let left = XK_PREVIEW_CROP;
-        let top = 0;
-        let bottom = 0;
-        let right = 0;
+        let left = XK_LOCK_LEFT;
+        let top = XK_LOCK_TOP;
+        let bottom = XK_LOCK_BOTTOM;
+        let right = XK_LOCK_RIGHT;
         if (XK_HASH_CROP) {
             left = XK_HASH_CROP.left;
             top = XK_HASH_CROP.top;
@@ -1286,20 +1294,31 @@
         const dlg = document.querySelector('.xk-dialog');
         if (!dlg) return;
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
-        if (isMobile) { dlg.style.width = ''; dlg.style.height = ''; return; }
-        if (XK_HASH_SIZE) {
-            dlg.style.maxWidth = 'none';
-            dlg.style.maxHeight = 'none';
-            dlg.style.width = XK_HASH_SIZE.w + 'px';
-            dlg.style.height = XK_HASH_SIZE.h + 'px';
+        if (isMobile) {
+            dlg.style.width = '';
+            dlg.style.height = '';
+            dlg.style.maxWidth = '';
+            dlg.style.maxHeight = '';
             return;
         }
-        try {
-            const w = parseInt(localStorage.getItem('xk_size_w'), 10);
-            const h = parseInt(localStorage.getItem('xk_size_h'), 10);
-            if (!isNaN(w) && w >= 320) { dlg.style.maxWidth = 'none'; dlg.style.width = w + 'px'; }
-            if (!isNaN(h) && h >= 420) { dlg.style.maxHeight = 'none'; dlg.style.height = h + 'px'; }
-        } catch (e) {}
+        // 【锁定】默认就用定版尺寸，除非地址栏带了 #size=
+        let w = XK_LOCK_W;
+        let h = XK_LOCK_H;
+        if (XK_HASH_SIZE) {
+            w = XK_HASH_SIZE.w;
+            h = XK_HASH_SIZE.h;
+        } else {
+            try {
+                const sw = parseInt(localStorage.getItem('xk_size_w'), 10);
+                const sh = parseInt(localStorage.getItem('xk_size_h'), 10);
+                if (!isNaN(sw) && sw >= 320) w = sw;
+                if (!isNaN(sh) && sh >= 400) h = sh;
+            } catch (e) {}
+        }
+        dlg.style.maxWidth = 'none';
+        dlg.style.maxHeight = 'none';
+        dlg.style.width = w + 'px';
+        dlg.style.height = h + 'px';
     }
 
     /* 鼠标移到机器人上就先开始加载，点开时通常已经好了 */
