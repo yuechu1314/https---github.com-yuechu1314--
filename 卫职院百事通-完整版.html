@@ -28,9 +28,11 @@ body{font-family:"PingFang SC","Microsoft YaHei","微软雅黑",-apple-system,Bl
 .sidebar-header h2{color:#fff;font-size:16px;font-weight:600;display:flex;align-items:center;gap:9px;white-space:nowrap;overflow:hidden}
 .sidebar-header .logo{width:30px;height:30px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
 .sidebar-nav{flex:1;padding:12px 10px}
-.section-toggle{padding:15px 0 8px 19px;font-size:12px;font-weight:600;letter-spacing:.08em;color:#6b7670;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;text-transform:uppercase;transition:color .18s;white-space:nowrap;overflow:hidden}
-.section-toggle:hover{color:#aeb8b2}
-.section-toggle .sec-left{display:flex;align-items:center;gap:7px}
+.section-toggle{position:relative;padding:10px 0 10px 17px;margin:2px 0;font-size:15px;font-weight:400;letter-spacing:0;color:#9aa39d;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;text-transform:none;border-radius:8px;transition:color .18s,background .18s;white-space:nowrap;overflow:hidden}
+.section-toggle:hover{background:rgba(255,255,255,.05);color:#eef2ef}
+.section-toggle::after{content:'';position:absolute;left:17px;right:12px;bottom:5px;height:2px;border-radius:2px;background:var(--accent-2);transform:scaleX(0);transform-origin:left center;transition:transform .24s cubic-bezier(0,0,0.2,1)}
+.section-toggle:hover::after{transform:scaleX(1)}
+.section-toggle .sec-left{display:flex;align-items:center;gap:10px}
 .section-toggle .toggle-arrow{font-size:9px;color:#5b665f;transition:transform .28s,opacity .18s;display:inline-block}
 .section-toggle.open .toggle-arrow{transform:rotate(90deg)}
 .items-wrapper{max-height:0;overflow:hidden;transition:max-height .32s ease}
@@ -386,7 +388,7 @@ html[data-theme="dark"] .tt-today-cell{background:rgba(255,255,255,.05)}
 .ico{display:inline-block;width:1em;height:1em;vertical-align:-.14em;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .sidebar-header .ico{width:18px;height:18px}
 .nav-icon .ico{width:18px;height:18px}
-.section-toggle .ico{width:13px;height:13px}
+.section-toggle .ico{width:18px;height:18px}
 .stat-ico .ico{width:17px;height:17px}
 .bar-ico .ico{width:18px;height:18px}
 .panel-icon .ico{width:24px;height:24px}
