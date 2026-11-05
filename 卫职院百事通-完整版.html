@@ -410,7 +410,7 @@ html[data-theme="dark"] .tt-today-cell{background:rgba(255,255,255,.05)}
 .xiao-ke-btn .pulse-ring{display:none}
 .xk-modal{position:fixed;inset:0;z-index:10000;display:none;pointer-events:none}
 .xk-modal.show{display:block}
-.xk-dialog{pointer-events:auto;position:absolute;right:26px;bottom:90px;width:33vw;min-width:360px;max-width:560px;height:72vh;min-height:440px;max-height:760px;display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:0 24px 60px rgba(20,30,25,.22);animation:xk-slide .22s ease;--xk-crop:420px}
+.xk-dialog{pointer-events:auto;position:absolute;right:26px;bottom:90px;width:400px;height:540px;min-width:320px;min-height:400px;max-width:900px;max-height:900px;display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:0 24px 60px rgba(20,30,25,.22);animation:xk-slide .22s ease;--xk-crop:788px;--xk-crop-top:108px;--xk-crop-bottom:44px;--xk-crop-right:0px}
 @keyframes xk-slide{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .xk-head{height:46px;min-height:46px;padding:0 8px 0 14px;display:flex;align-items:center;justify-content:space-between;background:var(--sidebar);color:#fff;user-select:none}
 .xk-head-title{display:flex;align-items:center;font-size:14px;font-weight:600}
@@ -419,7 +419,7 @@ html[data-theme="dark"] .tt-today-cell{background:rgba(255,255,255,.05)}
 .xk-btn{width:30px;height:30px;margin-left:3px;border:0;border-radius:8px;cursor:pointer;background:rgba(255,255,255,.1);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .18s;font-family:inherit}
 .xk-btn:hover{background:rgba(255,255,255,.22)}
 .xk-stage{position:relative;flex:1 1 auto;background:#eef1ea;overflow:hidden}
-.xk-stage iframe{position:absolute;top:0;height:100%;border:0;background:#fff;display:block;left:calc(0px - var(--xk-crop));width:calc(100% + var(--xk-crop))}
+.xk-stage iframe{position:absolute;border:0;background:#fff;display:block;left:calc(0px - var(--xk-crop));top:calc(0px - var(--xk-crop-top));width:calc(100% + var(--xk-crop) + var(--xk-crop-right));height:calc(100% + var(--xk-crop-top) + var(--xk-crop-bottom))}
 .xk-loading{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--surface-2);color:var(--ink-2);font-size:13px;text-align:center;padding:0 18px;transition:opacity .3s,visibility .3s}
 .xk-loading.hide{opacity:0;visibility:hidden}
 .xk-spinner{width:28px;height:28px;margin-bottom:12px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--accent);animation:xk-spin .8s linear infinite}
@@ -1636,24 +1636,124 @@ function handleSearchKey(e){
 }
 
 /* ================= 小可 ================= */
-const XK_AGENT_URL='https://code.coze.cn/p/7703769752451399722/preview?link_share=true';
-const XK_CROP_FIXED=420; let xkLoaded=false, xkHintTimer=null, xkHintHideTimer=null;
-function applyAgentCrop(){ const d=document.querySelector('.xk-dialog'); if(!d) return; const m=window.matchMedia('(max-width:768px)').matches; d.style.setProperty('--xk-crop',(m?0:XK_CROP_FIXED)+'px'); }
-function loadAgentFrame(){
-  const f=document.getElementById('xkFrame'), l=document.getElementById('xkLoading'), h=document.getElementById('xkHint'); if(!f||!l) return;
-  l.classList.remove('hide'); h.classList.remove('show'); xkLoaded=false;
-  f.onload=function(){ if(!f.src||f.src.indexOf('about:blank')===0) return; xkLoaded=true; l.classList.add('hide'); clearTimeout(xkHintTimer); };
-  clearTimeout(xkHintTimer); clearTimeout(xkHintHideTimer);
-  f.src='about:blank'; setTimeout(()=>{f.src=XK_AGENT_URL;},30);
-  xkHintTimer=setTimeout(()=>{ if(xkLoaded) return; h.classList.add('show'); xkHintHideTimer=setTimeout(()=>h.classList.remove('show'),9000); },6000);
+/* ===== 【锁定参数】对话框尺寸与裁切，定版后不要动这几行 ===== */
+const XK_LOCK_LEFT = 788;      // 左裁切
+const XK_LOCK_TOP = 108;       // 上裁切
+const XK_LOCK_BOTTOM = 44;     // 下裁切
+const XK_LOCK_RIGHT = 0;       // 右裁切
+const XK_LOCK_W = 400;         // 对话框宽
+const XK_LOCK_H = 540;         // 对话框高
+/* ============================================================ */
+
+/* 接入模式：'preview' = 扣子预览页（免令牌，慢）；'sdk' = Web SDK（需令牌，快） */
+const XK_MODE = 'preview';
+const XK_AGENT_URL = 'https://code.coze.cn/p/7703769752451399722/preview?link_share=true';
+const XK_SDK_ORIGIN = 'https://sdk.coze.site';
+const XK_PROJECT_ID = '7703769752451399722';
+const XK_SDK_TOKEN = (function () {
+    try { var s = localStorage.getItem('xk_wsdk_token'); if (s) return s; } catch (e) {}
+    return 'YOUR_TOKEN';
+})();
+
+let xkLoaded = false, xkLoadingStarted = false, xkHintTimer = null, xkHintHideTimer = null;
+
+function applyAgentCrop() {
+    const d = document.querySelector('.xk-dialog');
+    if (!d) return;
+    const m = window.matchMedia('(max-width:768px)').matches;
+    if (XK_MODE !== 'preview' || m) {
+        d.style.setProperty('--xk-crop', '0px');
+        d.style.setProperty('--xk-crop-top', '0px');
+        d.style.setProperty('--xk-crop-bottom', '0px');
+        d.style.setProperty('--xk-crop-right', '0px');
+        return;
+    }
+    d.style.setProperty('--xk-crop', XK_LOCK_LEFT + 'px');
+    d.style.setProperty('--xk-crop-top', XK_LOCK_TOP + 'px');
+    d.style.setProperty('--xk-crop-bottom', XK_LOCK_BOTTOM + 'px');
+    d.style.setProperty('--xk-crop-right', XK_LOCK_RIGHT + 'px');
 }
-function openAgent(){ try{ const m=document.getElementById('xkModal'); if(!m){goAgentPage();return;} if(m.classList.contains('show')){closeAgent();return;} m.classList.add('show'); m.setAttribute('aria-hidden','false'); applyAgentCrop(); if(!xkLoaded) loadAgentFrame(); }catch(e){ console.error(e); goAgentPage(); } }
+
+function applyAgentSize() {
+    const d = document.querySelector('.xk-dialog');
+    if (!d) return;
+    const m = window.matchMedia('(max-width:768px)').matches;
+    if (m) { d.style.width = ''; d.style.height = ''; d.style.maxWidth = ''; d.style.maxHeight = ''; return; }
+    d.style.maxWidth = 'none';
+    d.style.maxHeight = 'none';
+    d.style.width = XK_LOCK_W + 'px';
+    d.style.height = XK_LOCK_H + 'px';
+}
+
+function hideAgentLoading() {
+    const l = document.getElementById('xkLoading');
+    if (l) l.classList.add('hide');
+    clearTimeout(xkHintTimer);
+    xkLoaded = true; xkLoadingStarted = false;
+}
+
+function loadAgentFrame() {
+    const f = document.getElementById('xkFrame'), l = document.getElementById('xkLoading'), h = document.getElementById('xkHint');
+    if (!f || !l) return;
+
+    if (XK_MODE === 'sdk' && (!XK_SDK_TOKEN || XK_SDK_TOKEN === 'YOUR_TOKEN')) {
+        l.classList.remove('hide');
+        l.innerHTML = '<div style="font-size:13px;line-height:2;text-align:center;">还没有配置访问令牌<br><span style="font-size:12px;color:#8a8f8c;">双击「小可SDK测试.html」填一次令牌，这里会自动用上</span></div>';
+        xkLoadingStarted = false;
+        return;
+    }
+
+    l.classList.remove('hide'); h.classList.remove('show');
+    xkLoaded = false; xkLoadingStarted = true;
+    clearTimeout(xkHintTimer); clearTimeout(xkHintHideTimer);
+
+    if (XK_MODE === 'preview') {
+        f.onload = function () { if (!f.src || f.src.indexOf('about:blank') === 0) return; hideAgentLoading(); };
+        f.src = 'about:blank';
+        setTimeout(function () { f.src = XK_AGENT_URL; }, 30);
+    } else {
+        f.onload = null;
+        f.src = XK_SDK_ORIGIN + '/';
+    }
+
+    xkHintTimer = setTimeout(function () {
+        if (xkLoaded) return;
+        h.classList.add('show');
+        xkHintHideTimer = setTimeout(function () { h.classList.remove('show'); }, 9000);
+    }, 10000);
+}
+
+/* Web SDK 模式：收到 IFRAME_READY 后发送 INIT */
+window.addEventListener('message', function (event) {
+    if (XK_MODE !== 'sdk' || event.origin !== XK_SDK_ORIGIN) return;
+    const d = event.data || {};
+    const f = document.getElementById('xkFrame');
+    if (!f || !f.contentWindow) return;
+    if (d.type === 'IFRAME_READY') {
+        f.contentWindow.postMessage({ type: 'INIT', payload: { token: XK_SDK_TOKEN, projectId: XK_PROJECT_ID } }, XK_SDK_ORIGIN);
+        hideAgentLoading();
+    }
+    if (d.type === 'TOKEN_EXPIRED') {
+        f.contentWindow.postMessage({ type: 'UPDATE_TOKEN', payload: { token: XK_SDK_TOKEN } }, XK_SDK_ORIGIN);
+    }
+});
+
+function openAgent() {
+    try {
+        const m = document.getElementById('xkModal');
+        if (!m) { goAgentPage(); return; }
+        if (m.classList.contains('show')) { closeAgent(); return; }
+        m.classList.add('show'); m.setAttribute('aria-hidden', 'false');
+        applyAgentCrop(); applyAgentSize();
+        if (!xkLoaded && !xkLoadingStarted) loadAgentFrame();
+    } catch (e) { console.error(e); goAgentPage(); }
+}
 function goAgentPage(){ window.location.href='小可对话.html'; }
 function closeAgent(){ const m=document.getElementById('xkModal'); if(!m) return; m.classList.remove('show'); m.setAttribute('aria-hidden','true'); clearTimeout(xkHintTimer); const h=document.getElementById('xkHint'); if(h) h.classList.remove('show'); }
-function reloadAgent(){ loadAgentFrame(); }
+function reloadAgent(){ xkLoadingStarted = false; loadAgentFrame(); }
 function openAgentWindow(){ window.open('小可对话.html','_blank'); }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeAgent(); closeProfile(); closeNotif(); } });
-window.addEventListener('resize',()=>{ const m=document.getElementById('xkModal'); if(m&&m.classList.contains('show')) applyAgentCrop(); });
+window.addEventListener('resize',()=>{ const m=document.getElementById('xkModal'); if(m&&m.classList.contains('show')){ applyAgentCrop(); applyAgentSize(); } });
 
 /* 初始化 */
 /* ================= 主题（深色模式） ================= */
