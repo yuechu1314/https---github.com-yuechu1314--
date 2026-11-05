@@ -102,6 +102,28 @@ tr.hl .rule-title{color:var(--accent)}
 .stat-value{font-size:30px;font-weight:700;letter-spacing:-.02em;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums}
 .stat-foot{margin-top:11px;font-size:12px;color:var(--muted)}
 
+/* ===== 我的今日 ===== */
+.today-card{margin-bottom:16px}
+.today-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.today-stat{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.today-label{font-size:12px;color:var(--muted)}
+.today-value{font-size:26px;font-weight:700;color:var(--ink);line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums}
+.today-sub{font-size:11.5px;color:var(--muted);margin-top:4px}
+.today-tip{font-size:12px;color:var(--muted)}
+.today-todo{border-top:1px solid var(--line);padding-top:14px}
+.today-todo-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;font-size:13px;font-weight:600;color:var(--ink)}
+.today-todo-add{display:flex;gap:8px;align-items:center}
+.today-todo-add input{height:34px;width:220px;border:1px solid var(--line);border-radius:8px;padding:0 10px;font-size:12.5px;font-family:inherit;background:var(--surface);color:var(--ink);outline:0}
+.today-todo-add input:focus{border-color:var(--accent-2)}
+.today-todo-list{display:flex;flex-direction:column;gap:6px}
+.todo-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.todo-item:hover{background:var(--surface-2)}
+.todo-check{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.todo-text{flex:1;font-size:13px;color:var(--ink-2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.todo-item.done .todo-text{text-decoration:line-through;color:var(--muted)}
+.todo-empty{font-size:12.5px;color:var(--muted);padding:8px 2px}
+@media(max-width:900px){.today-grid{grid-template-columns:repeat(2,1fr)}}
+
 /* ===== 仪表盘分栏 ===== */
 .dash-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;box-shadow:0 1px 2px rgba(20,30,20,.03);transition:box-shadow .25s ease-out}
@@ -522,6 +544,29 @@ html[data-theme="dark"] .hl-mark{color:#1a1f1c}
         </div>
       </div>
 
+      <section class="card today-card">
+        <div class="card-head">
+          <div><div class="card-eyebrow">我的今日</div><h2><span id="todayDate">今天</span></h2></div>
+          <div class="card-head-actions"><span class="today-tip" id="todayTip"></span></div>
+        </div>
+        <div class="today-grid">
+          <div class="today-stat"><div class="today-label">今日净积分</div><div class="today-value" id="todayNet">0</div><div class="today-sub" id="todayNetSub">扣 0 · 加 0</div></div>
+          <div class="today-stat"><div class="today-label">学习时长</div><div class="today-value" id="todayMin">0</div><div class="today-sub">分钟</div></div>
+          <div class="today-stat"><div class="today-label">今日课程</div><div class="today-value" id="todayCourses">0</div><div class="today-sub">节</div></div>
+          <div class="today-stat"><div class="today-label">待办</div><div class="today-value" id="todayTodos">0</div><div class="today-sub">项未完成</div></div>
+        </div>
+        <div class="today-todo">
+          <div class="today-todo-head">
+            <span>今日待办</span>
+            <div class="today-todo-add">
+              <input type="text" id="todoInput" placeholder="添加一条待办…" onkeydown="if(event.key==='Enter'){event.preventDefault();addTodo();}">
+              <button class="ghost-btn" onclick="addTodo()">添加</button>
+            </div>
+          </div>
+          <div class="today-todo-list" id="todoList"></div>
+        </div>
+      </section>
+
       <div class="stat-row">
         <div class="stat-card"><div class="stat-top"><span class="stat-label">二级学院</span><span class="stat-ico"><svg class="ico"><use href="#i-building"/></svg></span></div><div class="stat-value">5</div><div class="stat-foot">医药卫生全领域覆盖</div></div>
         <div class="stat-card"><div class="stat-top"><span class="stat-label">开设专业</span><span class="stat-ico"><svg class="ico"><use href="#i-book"/></svg></span></div><div class="stat-value">30</div><div class="stat-foot">可查询专业介绍</div></div>
@@ -891,7 +936,7 @@ const deptRulesData = {
 /* ================= 通用 ================= */
 function toggleSection(el, wrapperId){ el.classList.toggle('open'); document.getElementById(wrapperId).classList.toggle('open'); }
 function hideAllPanels(){ ['collegePanel','deptPanel','scholarshipPanel','analysisPanel','studyPanel','timetablePanel'].forEach(id=>document.getElementById(id).classList.remove('show')); }
-function showHome(){ document.getElementById('homeView').style.display='flex'; }
+function showHome(){ document.getElementById('homeView').style.display='flex'; renderToday(); }
 function hideHome(){ document.getElementById('homeView').style.display='none'; }
 function openPage(name){ const el=document.querySelector('.nav-item[data-page="'+name+'"]'); switchPage(name, el); }
 function todayStr(){ const d=new Date(); const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return y+'-'+m+'-'+day; }
@@ -1378,6 +1423,54 @@ function pomoBeep(){
   o.start(t0); o.stop(t0+0.75);
 }
 
+/* ================= 我的今日 ================= */
+const TODO_KEY='wk_todos';
+function getTodos(){ try{ return JSON.parse(localStorage.getItem(TODO_KEY)||'[]'); }catch(e){ return []; } }
+function setTodos(a){ try{ localStorage.setItem(TODO_KEY,JSON.stringify(a)); }catch(e){} }
+function addTodo(){
+  const el=document.getElementById('todoInput'); if(!el) return;
+  const t=el.value.trim(); if(!t) return;
+  const arr=getTodos();
+  arr.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6), text:t, done:false, date:todayStr()});
+  setTodos(arr); el.value=''; renderToday();
+}
+function toggleTodo(id){ setTodos(getTodos().map(x=>x.id===id?Object.assign({},x,{done:!x.done}):x)); renderToday(); }
+function delTodo(id){ setTodos(getTodos().filter(x=>x.id!==id)); renderToday(); }
+function renderToday(){
+  const todayS=todayStr();
+  const d=new Date();
+  const wd=['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+  const dateEl=document.getElementById('todayDate');
+  if(dateEl) dateEl.textContent=todayS+' · '+wd;
+  const setTxt=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+
+  const dT=getDeductions().filter(x=>x.date===todayS);
+  const bT=getBonus().filter(x=>x.date===todayS);
+  const deduct=dT.reduce((s,x)=>s+(Number(x.points)||0),0);
+  const bonus=bT.reduce((s,x)=>s+(Number(x.points)||0),0);
+  const net=bonus-deduct;
+  const r1=v=>Math.round(v*10)/10;
+  setTxt('todayNet',(net>0?'+':'')+r1(net));
+  setTxt('todayNetSub','扣 '+r1(deduct)+' · 加 '+r1(bonus));
+
+  const st=getStudy().filter(x=>x.date===todayS);
+  const min=st.reduce((s,x)=>s+(Number(x.minutes)||0),0);
+  setTxt('todayMin',min);
+
+  const courses=getTimetable().filter(c=>c.day===todayDayNum()).length;
+  setTxt('todayCourses',courses);
+
+  const todos=getTodos();
+  setTxt('todayTodos',todos.filter(x=>!x.done).length);
+
+  const list=document.getElementById('todoList');
+  if(list){
+    list.innerHTML=todos.length?todos.map(x=>'<div class="todo-item'+(x.done?' done':'')+'"><input type="checkbox" class="todo-check" '+(x.done?'checked':'')+' onchange="toggleTodo(\''+x.id+'\')"><span class="todo-text">'+escHtml(x.text)+'</span><button class="del-btn" onclick="delTodo(\''+x.id+'\')" title="删除">✕</button></div>').join(''):'<div class="todo-empty">还没有待办，添加一条吧。</div>';
+  }
+  const tip=document.getElementById('todayTip');
+  if(tip) tip.textContent=(courses?'今天 '+courses+' 节课':'今天没课')+(min?' · 已学 '+min+' 分钟':'');
+}
+
 /* ================= 通知 ================= */
 function toggleNotif(e){
   if(e) e.stopPropagation();
@@ -1543,7 +1636,7 @@ document.addEventListener('DOMContentLoaded', function(){
   const d=document.getElementById('dDate'); if(d) d.value=today;
   const sd=document.getElementById('sDate'); if(sd) sd.value=today;
   const bd=document.getElementById('bDate'); if(bd) bd.value=today;
-  renderAnalysis(); renderBonus(); renderStudy(); renderProfile(); renderTimetable(); pomoRender(); renderNotif();
+  renderAnalysis(); renderBonus(); renderStudy(); renderProfile(); renderTimetable(); pomoRender(); renderNotif(); renderToday();
   const cd=document.getElementById('cDay'); if(cd) cd.value=todayDayNum();
 });
 </script>
